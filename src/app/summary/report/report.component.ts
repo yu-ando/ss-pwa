@@ -11,15 +11,13 @@ import {ScheduleService} from "../../service/schedule.service";
 })
 export class ReportComponent implements OnInit {
   private schedule: ScheduleService;
-
+  
   dateList = {};
   reportGridObj: AngularGridInstance;
-
   reportColumnDefinitions: Column[];
   reportGridOptions: GridOption;
   reportDataset: any[] = [];
   reportClassset: any[] = [];
-
   timeTotalList = {0: 0, 1: 0, 2: 0};
 
   constructor(private router: Router, ar: ActivatedRoute, private sc: ScheduleService, private translate: TranslateService) {
@@ -206,7 +204,6 @@ export class ReportComponent implements OnInit {
       let work = 0;
       let rest = 0;
       $scheduleData.forEach(function($record){
-        console.log($record);
         if ($record.start < start) {
           start = $record.start;
         }

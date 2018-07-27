@@ -3,8 +3,8 @@ import { Routes, RouterModule } from '@angular/router';
 import { ReportComponent } from './report/report.component';
 
 const routes: Routes = [
-  { path: 'summary/report/:year/:month', component: ReportComponent },
-  { path: 'summary/report', component: ReportComponent }
+  { path: 'report/:year/:month', component: ReportComponent },
+  { path: 'report', component: ReportComponent }
 ];
 
 @NgModule({

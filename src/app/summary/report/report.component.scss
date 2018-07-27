@@ -1,0 +1,39 @@
+.nav-area {
+  font-size: 12px;
+  margin: 5px 0 0 0;
+}
+.nav-link-left {
+  text-decoration:none;
+}
+.nav-link-right {
+  text-decoration:none;
+  float: right;
+}
+.content-title {
+  margin-top: 5px;
+  padding: 5px;
+  font-size: 20px;
+  font-weight: bold;
+  background-color: #eeeeee;
+}
+
+.report-total {
+  padding: 0 0 5px 0;
+  font-size: 12px;
+  width: 100%;
+}
+.report-total span {
+  font-weight: bold;
+}
+
+.report-viewer {
+  padding: 5px 0 0 0;
+  font-size: 10px;
+  width: 100%;
+}
+
+.save_btn {
+  float: right;
+  font-size: 12px;
+  padding: 3px 15px 3px 15px;
+}

@@ -1,0 +1,32 @@
+<div class="nav-area">
+  <a class="nav-link-left" routerLink="/schedule/editor/{{dateList['past_date']}}" (click)="changeCurrentDate(dateList['past_year'], dateList['past_month'], dateList['past_day'])">＜＜ [ {{dateList['past_date']}} ]</a>
+  <a class="nav-link-right" routerLink="/schedule/editor/{{dateList['next_date']}}" (click)="changeCurrentDate(dateList['next_year'], dateList['next_month'], dateList['next_day'])">[ {{dateList['next_date']}} ] ＞＞</a>
+</div>
+<h1 class="content-title">{{dateList['current_date']}} 日報入力</h1>
+<div class="editor-total">
+  <span class="information_red" *ngIf="planData['holiday']===1">[休日設定日] </span>
+  作業予定: <span>{{planData['p_start']}}</span> 〜 <span>{{planData['p_end']}}</span> |
+  予定作業時間数: <span>{{planData['p_work']}}h</span> |
+  予定除外時間数: <span>{{planData['p_rest']}}h</span> <span>{{planNoSetMsg}}</span>
+</div>
+<div class="editor-total">
+  {{categoryList[0]}}時間数: <span>{{categoryTotalList[0].toFixed(2)}}h</span> |
+  {{categoryList[1]}}時間数: <span>{{categoryTotalList[1].toFixed(2)}}h</span> |
+  {{categoryList[2]}}時間数: <span>{{categoryTotalList[2].toFixed(2)}}h</span>
+</div>
+<button type="button" class="save_btn btn btn-outline-primary" (click)="saveScheduleItem()">登録・更新</button>
+<button type="button" class="add_btn btn btn-outline-secondary" (click)="addEditorRow()">++行追加++</button>
+<div class="editor-option">
+<label class="editor-option-label"><input type="checkbox" name="autoedit_option" id="autoedit_option" [value]="!this.editorGridOptions.autoEdit" [checked]="!this.editorGridOptions.autoEdit" (click)="changeAutoEdit()">ダブルクリックで編集する</label>
+</div>
+<div class="editor-input">
+  <angular-slickgrid
+    gridId="editor"
+    [columnDefinitions]="editorColumnDefinitions"
+    [gridOptions]="editorGridOptions"
+    [dataset]="editorDataset"
+    (onAngularGridCreated)="editorReady($event)"
+    (sgOnCellChange)="onCellChanged($event.detail.eventData, $event.detail.args)"
+    (sgOnClick)="onCellClick($event.detail.eventData, $event.detail.args)">
+  </angular-slickgrid>
+</div>

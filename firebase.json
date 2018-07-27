@@ -1,0 +1,11 @@
+{
+  "hosting": {
+    "public": "dist/self-scheduler",
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }
+}

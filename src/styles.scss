@@ -17,3 +17,28 @@ $app-theme:   mat-light-theme($app-primary, $app-accent);
 @include angular-material-theme($app-theme);
 
 body { margin: 0; }
+
+
+/* custom styles */
+.plan-cell {
+  background-color: lightyellow !important;
+}
+.holiday-cell {
+  background-color: lightcyan !important;
+}
+.holiday-cell-red {
+  color: red;
+  background-color: lightcyan !important;
+}
+.ac {
+  text-align: center;
+}
+.del_btn {
+  font-size: 9px;
+  padding: 2px 5px 2px 5px;
+}
+
+/* make sure to add the @import the SlickGrid Bootstrap Theme AFTER the variables changes */
+$cell-odd-background-color: white;
+$row-mouse-hover-color: lightgreen;
+@import '../node_modules/angular-slickgrid/styles/sass/slickgrid-theme-bootstrap.scss';

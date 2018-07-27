@@ -25,20 +25,20 @@ import {
 export class EditorComponent implements OnInit {
   private schedule: ScheduleService;
 
-  private dateList = {};
-  private planData = {};
-  private planNoSetMsg = '';
-  private editorGridObj: AngularGridInstance;
+  dateList = {};
+  planData = {};
+  planNoSetMsg = '';
+  editorGridObj: AngularGridInstance;
 
-  private editorColumnDefinitions: Column[];
-  private editorGridOptions: GridOption;
-  private editorDataset: any[] = [];
-  private nextId: number;
-  private categoryList = {0: '業務内', 1: '休憩', 2: '業務外'};
-  private categoryFormatter: Formatter = (row: number, cell: number, value: any, columnDef: Column, dataContext: any, grid?: any) => this.categoryList[value];
-  private categoryTotalList = {0: 0, 1: 0, 2: 0};
+  editorColumnDefinitions: Column[];
+  editorGridOptions: GridOption;
+  editorDataset: any[] = [];
+  nextId: number;
+  categoryList = {0: '業務内', 1: '休憩', 2: '業務外'};
+  categoryFormatter: Formatter = (row: number, cell: number, value: any, columnDef: Column, dataContext: any, grid?: any) => this.categoryList[value];
+  categoryTotalList = {0: 0, 1: 0, 2: 0};
 
-  private viewerGridObj: AngularGridInstance;
+  viewerGridObj: AngularGridInstance;
   viewerColumnDefinitions: Column[];
   viewerGridOptions: GridOption;
   viewerDataset: any[] = [];

@@ -12,15 +12,15 @@ import {ScheduleService} from "../../service/schedule.service";
 export class ReportComponent implements OnInit {
   private schedule: ScheduleService;
 
-  private dateList = {};
-  private reportGridObj: AngularGridInstance;
+  dateList = {};
+  reportGridObj: AngularGridInstance;
 
-  private reportColumnDefinitions: Column[];
-  private reportGridOptions: GridOption;
-  private reportDataset: any[] = [];
-  private reportClassset: any[] = [];
+  reportColumnDefinitions: Column[];
+  reportGridOptions: GridOption;
+  reportDataset: any[] = [];
+  reportClassset: any[] = [];
 
-  private timeTotalList = {0: 0, 1: 0, 2: 0};
+  timeTotalList = {0: 0, 1: 0, 2: 0};
 
   constructor(private router: Router, ar: ActivatedRoute, private sc: ScheduleService, private translate: TranslateService) {
     this.schedule = sc;

@@ -23,7 +23,7 @@ import {
   styleUrls: ['./editor.component.scss']
 })
 export class EditorComponent implements OnInit {
-  private schedule: ScheduleService;
+  private scs: ScheduleService;
 
   dateList = {};
   planData = {};
@@ -33,18 +33,14 @@ export class EditorComponent implements OnInit {
   editorColumnDefinitions: Column[];
   editorGridOptions: GridOption;
   editorDataset: any[] = [];
+  editorClassset: any[] = [];
   nextId: number;
   categoryList = {0: '業務内', 1: '休憩', 2: '業務外'};
   categoryFormatter: Formatter = (row: number, cell: number, value: any, columnDef: Column, dataContext: any, grid?: any) => this.categoryList[value];
   categoryTotalList = {0: 0, 1: 0, 2: 0};
 
-  viewerGridObj: AngularGridInstance;
-  viewerColumnDefinitions: Column[];
-  viewerGridOptions: GridOption;
-  viewerDataset: any[] = [];
-
   constructor(private router: Router, ar: ActivatedRoute, private sc: ScheduleService, private translate: TranslateService) {
-    this.schedule = sc;
+    this.scs = sc;
     let year = 0;
     let month = 0;
     let day = 0;
@@ -93,15 +89,11 @@ export class EditorComponent implements OnInit {
     this.initEditorColumnDefinitions();
     this.initEditorGridOptions();
     this.loadEditorData();
-    // this.initViewerColumnDefinitions();
-    // this.initViewerGridOptions();
-    // this.loadViewerData(this.dateList['past_date']);
   }
   // change edit date.
   changeCurrentDate($year, $month, $day) {
     this.setDateList($year, $month, $day);
     this.loadEditorData();
-    // this.loadViewerData(this.dateList['past_date']);
   }
 
   /* --------------------------------- *
@@ -109,9 +101,7 @@ export class EditorComponent implements OnInit {
    * --------------------------------- */
   editorReady(angularGrid: AngularGridInstance) {
     this.editorGridObj = angularGrid;
-  }
-  viewerReady(angularGrid: AngularGridInstance) {
-    this.viewerGridObj = angularGrid;
+    this.styleSetting();
   }
   initEditorColumnDefinitions() {
     this.editorColumnDefinitions = [
@@ -165,51 +155,7 @@ export class EditorComponent implements OnInit {
       this.editorGridObj.slickGrid.setOptions({autoEdit: true});
     }
   }
-  initViewerColumnDefinitions() {
-    this.viewerColumnDefinitions = [
-      { id: 'start', name: '開始時間', field: 'start', sortable: true, minWidth: 80, type: FieldType.string, editor: { model: Editors.text } },
-      { id: 'end', name: '終了時間', field: 'end', sortable: true, minWidth: 80, type: FieldType.string, editor: { model: Editors.text } },
-      { id: 'hour', name: '時間数', field: 'hour', sortable: true, minWidth: 80 },
-      { id: 'category', name: '分類', field: 'category', sortable: true, minWidth: 100, editor: {
-          model: Editors.singleSelect,
-          collection: Object.keys(this.categoryList).map(k => ({value: k, label: this.categoryList[k]})),
-          collectionSortBy: {
-            property: 'value',
-            sortDesc: false
-          },
-        },
-        formatter: this.categoryFormatter,
-        params: this.categoryList,
-      },
-      { id: 'type', name: '種別', field: 'type', sortable: true, minWidth: 100, editor: { model: Editors.text } },
-      { id: 'task', name: 'タスク名', field: 'task', sortable: true, minWidth: 100, type: FieldType.string, editor: { model: Editors.text } },
-      { id: 'memo', name: 'メモ', field: 'memo', sortable: true, minWidth: 100, type: FieldType.string, editor: { model: Editors.longText } },
-    ];
-  }
-  initViewerGridOptions() {
-    this.viewerGridOptions = {
-      enableAutoResize: true,
-      asyncEditorLoading: false,
-      editable: true,
-      autoEdit: true,
-      autoHeight: false,
-      enableCellNavigation: true,
-      enableColumnPicker: true,
-      enableExcelCopyBuffer: true,
-      i18n: this.translate,
-      showHeaderRow: false,
-      enableGridMenu: false,
-      enableSorting: true,
-      enableHeaderMenu: false,
-      enableHeaderButton: false,
-      enableRowSelection: true,
-    };
-  }
   loadEditorData() {
-    // grid再描画の場合のみ
-    if (!!this.editorGridObj) {
-      this.editorGridObj.gridService.resetGrid(this.editorColumnDefinitions);
-    }
     const savedData = localStorage.getItem('ss_' + this.dateList['current_date']);
     let result = [];
     if (savedData !== null) {
@@ -229,6 +175,15 @@ export class EditorComponent implements OnInit {
     this.calTotalTime();
     // 作業予定情報の取得
     this.loadCurrentPlanData();
+    // style css reset.
+    for (let idx in this.editorDataset) {
+      this.editorClassset.push(this.createClassSet(this.editorDataset[idx]));
+    }
+    // grid reset.
+    if (!!this.editorGridObj) {
+      this.editorGridObj.gridService.resetGrid(this.editorColumnDefinitions);
+      this.styleSetting();
+    }
   }
 
   /**
@@ -264,21 +219,21 @@ export class EditorComponent implements OnInit {
       this.planNoSetMsg = ' ＞＞作業予定を月次集計ページで設定してください。';
     }
   }
-  loadViewerData($datakey) {
-    const savedData = localStorage.getItem('ss_' + $datakey);
-    let result = [];
-    if (savedData !== null) {
-      try {
-        result = JSON.parse(savedData);
-      } catch ($e) {
-        console.log($e);
-      }
-    }
-    this.viewerDataset = result;
-    // grid再描画の場合のみ
-    if (!!this.viewerGridObj) {
-      this.viewerGridObj.gridService.renderGrid();
-    }
+  createClassSet($item) {
+    let classSet = {
+      start: '',
+      end: '',
+      hour: '',
+      category: '',
+      type: '',
+      task: '',
+      memo: '',
+    };
+    return classSet;
+  }
+  styleSetting() {
+    // css_styleを設定
+    this.editorGridObj.slickGrid.setCellCssStyles("", this.editorClassset);
   }
   addBlankRow(addcount: number = 1) {
     const lastItem = this.editorDataset.pop(); // 末尾要素を取り出し
@@ -304,32 +259,32 @@ export class EditorComponent implements OnInit {
     }
   }
   onCellChanged(e, args) {
-    let updateFlg = false;
-
-    // end time to next start.
-    if (args.cell === 1) {
-      const end = this.editorDataset[args.row]['end'];
-      const updatedItem = this.editorGridObj.gridService.getDataItemByRowNumber(args.row + 1);
-      if (!!updatedItem) {
-        updatedItem.start = end;
-        if (!!updatedItem.end) {
-          updatedItem.hour = this.calWorkHour(updatedItem.start, updatedItem.end).toFixed(2);
-        }
-        updateFlg = true;
+    if (args.cell === 0 || args.cell === 1) {
+      const editRowItem = this.editorGridObj.gridService.getDataItemByRowNumber(args.row);
+      if (args.cell === 0) { // 開始時間
+        editRowItem.start = this.scs.formatTimeString(this.scs.convertToHankaku(args.item.start));
       }
-    }
-    // 時間を計算し設定する
-    const hour = this.calWorkHour(this.editorDataset[args.row]['start'], this.editorDataset[args.row]['end']).toFixed(2);
-    if (this.editorDataset[args.row]['hour'] !== hour) {
-      this.editorDataset[args.row]['hour'] = hour;
-      updateFlg = true;
+      if (args.cell === 1) { // 終了時間
+        editRowItem.end = this.scs.formatTimeString(this.scs.convertToHankaku(args.item.end));
+        // 次の行の開始時間を変更する
+        const nextRowItem = this.editorGridObj.gridService.getDataItemByRowNumber(args.row + 1);
+        if (!!nextRowItem) {
+          nextRowItem.start = editRowItem.end;
+          if (!!nextRowItem.end) {
+            nextRowItem.hour = this.scs.calWorkHour(nextRowItem.start, nextRowItem.end).toFixed(2);
+          }
+        }
+      }
+      // 時間を計算し設定する
+      const hour = this.scs.calWorkHour(editRowItem.start, editRowItem.end).toFixed(2);
+      if (editRowItem.hour !== hour) {
+        editRowItem.hour = hour;
+      }
     }
     // 総時間数の更新
     this.calTotalTime();
-    // 更新がある場合は再レンダリングする
-    if (updateFlg) {
-      this.editorGridObj.gridService.renderGrid();
-    }
+    // 再描画
+    this.editorGridObj.gridService.renderGrid();
   }
   calTotalTime() {
     // 総時間数の更新
@@ -342,25 +297,6 @@ export class EditorComponent implements OnInit {
       }
       this.categoryTotalList[$item.category] += Number($item.hour);
     }, this);
-  }
-  calWorkHour($start, $end) {
-    if (!$start || !$end) {
-      return 0;
-    }
-    const separatorIdxStart: number = $start.indexOf(':');
-    const separatorIdxEnd: number = $end.indexOf(':');
-    if (separatorIdxStart < 0 || separatorIdxEnd < 0) {
-      return 0;
-    }
-    const start_time: number = Number($start.substr(0, separatorIdxStart));
-    const start_second: number = $start.substr(separatorIdxStart + 1) / 60;
-    const end_time: number = Number($end.substr(0, separatorIdxEnd));
-    const end_second: number = $end.substr(separatorIdxEnd + 1) / 60;
-    const hour = (end_time + end_second) - (start_time + start_second);
-    if (hour < 0) {
-      return 0;
-    }
-    return hour;
   }
   onCellClick(e, args) {
     // delete btn process.
@@ -378,14 +314,28 @@ export class EditorComponent implements OnInit {
     // 現在のデータを登録する
     const saveData = [];
     let count = 1;
+    let lines = 0;
+    let stopFlg = false;
+    let alertMsgs = '';
     this.editorDataset.forEach(function ($record) {
+      lines++;
       if (!!$record['start'] && !!$record['end']) {
         $record['id'] = count++;
         saveData.push($record);
+
+        // データバリデーション
+        if ($record['start'] >= $record['end']) {
+          stopFlg = true;
+          alertMsgs = alertMsgs + '[line.'+lines+'] 開始時間と終了時間が逆転もしくは同一になっています\n';
+        }
       }
     });
     if (saveData.length < 1) {
       alert('保存できるデータが存在しません。' + "\n" + '"開始時間"と"終了時間"の両方が設定されているレコードが保存対象になります。');
+      return;
+    }
+    if (stopFlg) {
+      alert('入力内容に不備があります。以下の内容を確認してください。\n' + alertMsgs);
       return;
     }
     this.editorDataset = saveData;

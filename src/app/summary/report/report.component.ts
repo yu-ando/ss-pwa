@@ -10,8 +10,8 @@ import {ScheduleService} from "../../service/schedule.service";
   styleUrls: ['./report.component.scss']
 })
 export class ReportComponent implements OnInit {
-  private schedule: ScheduleService;
-  
+  private scs: ScheduleService;
+
   dateList = {};
   reportGridObj: AngularGridInstance;
   reportColumnDefinitions: Column[];
@@ -21,7 +21,7 @@ export class ReportComponent implements OnInit {
   timeTotalList = {0: 0, 1: 0, 2: 0};
 
   constructor(private router: Router, ar: ActivatedRoute, private sc: ScheduleService, private translate: TranslateService) {
-    this.schedule = sc;
+    this.scs = sc;
     let year = 0;
     let month = 0;
     ar.params.subscribe(params => {
@@ -89,7 +89,6 @@ export class ReportComponent implements OnInit {
       asyncEditorLoading: true,
       editable: true,
 
-      autoHeight: false,
       autoEdit: true,
       enableCellNavigation: true,
       enableColumnPicker: false,
@@ -103,6 +102,8 @@ export class ReportComponent implements OnInit {
       enableRowSelection: true,
 
       enableAddRow: false,
+
+      autoHeight: false,
     };
   }
   loadReportData() {
@@ -172,30 +173,25 @@ export class ReportComponent implements OnInit {
     // item作成とdefault設定
     const item = {
       id: this.dateList['current_date'] + '/' + $current.getDate(),
-      day: this.zeroFill($current.getDate(), 2) + ' (' + dayNames[$current.getDay()] + ')',
-      start: '10:00',
-      end: '19:00',
-      rest: '1.00',
-      work: '8.00',
+      day: this.scs.zeroFill($current.getDate(), 2) + ' (' + dayNames[$current.getDay()] + ')',
+      start: '--:--',
+      end: '--:--',
+      rest: '0.00',
+      work: '0.00',
       p_work: '8.00',
       p_start: '10:00',
       p_end: '19:00',
       p_rest: '1.00',
       holiday: 0
     };
-    // 休日default設定(休日と平日でdefault変更)
+    // 休日指定曜日のplan:defaultを設定
     if (holidays[$current.getDay()] === '1') {
-      item.start = '';
-      item.end = '';
-      item.rest = '';
-      item.work = '';
       item.p_work = '0.00';
       item.p_start = '';
       item.p_end = '';
       item.p_rest = '0.00';
       item.holiday = 1;
     }
-
     // scheduleデータ設定
     if (!!$scheduleData) {
       //TODO: 1日のレンジが00:00〜23:59想定、それを超えての1日定義は仕様変更が必要
@@ -210,7 +206,7 @@ export class ReportComponent implements OnInit {
         if (end < $record.end) {
           end = $record.end;
         }
-        const hour = this.calWorkHour($record.start, $record.end);
+        const hour = this.scs.calWorkHour($record.start, $record.end);
         if ($record.category == 0) {
           work += hour;
         } else {
@@ -221,8 +217,13 @@ export class ReportComponent implements OnInit {
       item.end = end;
       item.rest = rest.toFixed(2);
       item.work = work.toFixed(2);
+    } else if (item.holiday == 1) {
+      // scheduleデータ未登録かつ休日の場合、defaultを再設定
+      item.start = '';
+      item.end = '';
+      item.rest = '';
+      item.work = '';
     }
-
     // planデータ設定
     const planKey = $current.getFullYear() + '/' + ($current.getMonth() + 1) + '/' + $current.getDate();
     if (!!$planDataList[planKey]) {
@@ -233,7 +234,6 @@ export class ReportComponent implements OnInit {
       item.p_rest = planData.p_rest;
       item.holiday = planData.holiday;
     }
-
     return item;
   }
   createClassSet($item) {
@@ -264,25 +264,6 @@ export class ReportComponent implements OnInit {
       };
     }
     return classSet;
-  }
-  calWorkHour($start, $end) {
-    if (!$start || !$end) {
-      return 0;
-    }
-    const separatorIdxStart: number = $start.indexOf(':');
-    const separatorIdxEnd: number = $end.indexOf(':');
-    if (separatorIdxStart < 0 || separatorIdxEnd < 0) {
-      return 0;
-    }
-    const start_time: number = Number($start.substr(0, separatorIdxStart));
-    const start_second: number = $start.substr(separatorIdxStart + 1) / 60;
-    const end_time: number = Number($end.substr(0, separatorIdxEnd));
-    const end_second: number = $end.substr(separatorIdxEnd + 1) / 60;
-    const hour = (end_time + end_second) - (start_time + start_second);
-    if (hour < 0) {
-      return 0;
-    }
-    return hour;
   }
   calTotalTime() {
     // 総時間数の更新
@@ -324,21 +305,13 @@ export class ReportComponent implements OnInit {
     if (args.cell === 6 || args.cell === 7 || args.cell === 8) {
       const updatedItem = this.reportGridObj.gridService.getDataItemByRowNumber(args.row);
       if (args.cell === 6) {
-        if (!this.formatCheckTime(args.item.p_start)) {
-          updatedItem.p_start = '';
-          this.reportGridObj.gridService.renderGrid();
-          return;
-        }
+        updatedItem.p_start = this.scs.formatTimeString(this.scs.convertToHankaku(args.item.p_start));
       }
       if (args.cell === 7) {
-        if (!this.formatCheckTime(args.item.p_end)) {
-          updatedItem.p_end = '';
-          this.reportGridObj.gridService.renderGrid();
-          return;
-        }
+        updatedItem.p_end = this.scs.formatTimeString(this.scs.convertToHankaku(args.item.p_end));
       }
-      let work = this.calWorkHour(updatedItem.p_start, updatedItem.p_end);
-      let rest = Number(updatedItem.p_rest);
+      let work = this.scs.calWorkHour(updatedItem.p_start, updatedItem.p_end);
+      let rest = Number(this.scs.convertToHankaku(updatedItem.p_rest));
       if (!rest) {
         // 休憩時間のフォーマットが数字以外の場合は"0.00"に差し替え
         updatedItem.p_rest = '0.00';
@@ -346,49 +319,11 @@ export class ReportComponent implements OnInit {
       }
       updatedItem.p_rest = rest.toFixed(2);
       updatedItem.p_work = (work - rest).toFixed(2);
-      this.reportGridObj.gridService.renderGrid();
-      return;
     }
     if (args.cell === 9) {
       this.reportClassset[args.row] = this.createClassSet(args.item);
       this.styleSetting();
-      this.reportGridObj.gridService.renderGrid();
-      return;
     }
-  }
-
-  /**
-   * 指定文字列の左に"0"を付与する
-   * 結果の文字列は第二引数に指定した文字長になる
-   * @param string $str ゼロ埋めする文字列
-   * @param number $digits ゼロ埋め後の文字数
-   * @returns ゼロ埋めした文字列
-   */
-  zeroFill($str, $digits) {
-    return ('00000000000000000000' + $str).slice(-$digits);
-  }
-
-  /**
-   * 時刻形式をチェックする
-   * @param string $check 00:00のような形式の文字列
-   * return チェック結果
-   */
-  formatCheckTime($check) {
-    if (!$check.match(/^(0?[0-9]|1[0-9]|2[0-3]):(0?[0-9]|[1-5][0-9])$/)) {
-      return false;
-    }
-    return true;
-  }
-  /**
-   * 数字形式をチェックする
-   * @param string $check 数字形式の文字列(0.00も可)
-   * return チェック結果
-   */
-  formatCheckNumber($check) {
-    const num = Number($check);
-    if (num !== 0 && !num) {
-      return false;
-    }
-    return true;
+    this.reportGridObj.gridService.renderGrid();
   }
 }

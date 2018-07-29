@@ -16,10 +16,19 @@ $app-theme:   mat-light-theme($app-primary, $app-accent);
 // Include the default theme styles.
 @include angular-material-theme($app-theme);
 
-body { margin: 0; }
-
+body {
+  margin: 0;
+  padding: 0;
+  overflow: auto;
+}
 
 /* custom styles */
+.navbar {
+  font-size: 14px;
+}
+.main-content {
+  padding: 2px 5px 0 5px;
+}
 .plan-cell {
   background-color: lightyellow !important;
 }
@@ -41,4 +50,5 @@ body { margin: 0; }
 /* make sure to add the @import the SlickGrid Bootstrap Theme AFTER the variables changes */
 $cell-odd-background-color: white;
 $row-mouse-hover-color: lightgreen;
+$font-size-base: 12px;
 @import '../node_modules/angular-slickgrid/styles/sass/slickgrid-theme-bootstrap.scss';

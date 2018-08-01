@@ -114,7 +114,7 @@ export class ReportComponent implements OnInit {
 
     // 月次の作業予定データ取得
     let planDataList = {};
-    const storagePlanData = localStorage.getItem('ss_plan-' + this.dateList['current_date']);
+    const storagePlanData = localStorage.getItem('ss_pl-' + this.dateList['current_date']);
     if (storagePlanData !== null) {
       try {
         // 日報データあり
@@ -297,7 +297,7 @@ export class ReportComponent implements OnInit {
       alert('保存できるデータが存在しません。' + "\n" + '"予定開始","予定終了","予定除外"の全てが設定されているレコードが保存対象になります。');
       return;
     }
-    localStorage.setItem('ss_plan-' + this.dateList['current_date'], JSON.stringify(saveData));
+    localStorage.setItem('ss_pl-' + this.dateList['current_date'], JSON.stringify(saveData));
     alert('[' + this.dateList['current_date'] + ']の作業予定を保存しました。');
   }
   onCellChanged(e, args) {

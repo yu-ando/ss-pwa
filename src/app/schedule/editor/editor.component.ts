@@ -156,7 +156,7 @@ export class EditorComponent implements OnInit {
     }
   }
   loadEditorData() {
-    const savedData = localStorage.getItem('ss_' + this.dateList['current_date']);
+    const savedData = localStorage.getItem('ss_sc-' + this.dateList['current_date']);
     let result = [];
     if (savedData !== null) {
       try {
@@ -195,7 +195,7 @@ export class EditorComponent implements OnInit {
    */
   loadCurrentPlanData() {
     let planLoadFlg = false;
-    const savedData = localStorage.getItem('ss_plan-' + this.dateList['current_year'] + '/' + this.dateList['current_month']);
+    const savedData = localStorage.getItem('ss_pl-' + this.dateList['current_year'] + '/' + this.dateList['current_month']);
     if (savedData !== null) {
       try {
         const result = JSON.parse(savedData);
@@ -339,7 +339,7 @@ export class EditorComponent implements OnInit {
       return;
     }
     this.editorDataset = saveData;
-    localStorage.setItem('ss_' + this.dateList['current_date'], JSON.stringify(saveData));
+    localStorage.setItem('ss_sc-' + this.dateList['current_date'], JSON.stringify(saveData));
     this.addBlankRow(1);
     alert('[' + this.dateList['current_date'] + ']の日報を保存しました。');
   }

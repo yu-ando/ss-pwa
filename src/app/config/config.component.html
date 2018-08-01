@@ -1,11 +1,24 @@
 <h1 class="content-title">設定管理</h1>
+<h2 class="menu-title">各種デフォルト設定</h2>
+<!-- ここをデフォルト設定分ループ:単一設定のもの-->
+<h3 class="config-title">編集モード</h3>
+<div class="menu-text">
+  <label><input type="radio" name="editmode" checked>&nbsp;登録・更新ボタン表示</label>&nbsp;
+  <label><input type="radio" name="editmode">&nbsp;随時登録・更新</label>&nbsp;
+</div>
+<!-- ここまで -->
+<br/>
+
+<h2 class="menu-title">ストレージデータ管理</h2>
+<div class="menu-text">
+  ストレージデータの管理：確認・削除<br/>
+  <a routerLink="/config/storage" routerLinkActive="active">＞＞ストレージデータ管理ページへ</a><br/>
+</div>
+<br/>
+
 <h2 class="menu-title">データバックアップ</h2>
 <div class="menu-text">
   現在記録されているデータをコピーまたは、上書き更新(別ページ)<br/>
   <a routerLink="/config/backup" routerLinkActive="active">＞＞バックアップページへ</a><br/>
 </div>
 <br/>
-<h2 class="menu-title">各種デフォルト設定</h2>
-<h3 class="config-title">編集モード</h3>
-<div class="menu-text">
-</div>

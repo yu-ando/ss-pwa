@@ -192,6 +192,17 @@ export class ReportComponent implements OnInit {
       item.p_rest = '0.00';
       item.holiday = 1;
     }
+    // planデータ設定
+    const planKey = $current.getFullYear() + '/' + ($current.getMonth() + 1) + '/' + $current.getDate();
+    if (!!$planDataList[planKey]) {
+      const planData = $planDataList[planKey];
+      item.p_start = planData.p_start;
+      item.p_end = planData.p_end;
+      item.p_work = planData.p_work;
+      item.p_rest = planData.p_rest;
+      item.holiday = planData.holiday;
+    }
+
     // scheduleデータ設定
     if (!!$scheduleData) {
       //TODO: 1日のレンジが00:00〜23:59想定、それを超えての1日定義は仕様変更が必要
@@ -223,16 +234,6 @@ export class ReportComponent implements OnInit {
       item.end = '';
       item.rest = '';
       item.work = '';
-    }
-    // planデータ設定
-    const planKey = $current.getFullYear() + '/' + ($current.getMonth() + 1) + '/' + $current.getDate();
-    if (!!$planDataList[planKey]) {
-      const planData = $planDataList[planKey];
-      item.p_start = planData.p_start;
-      item.p_end = planData.p_end;
-      item.p_work = planData.p_work;
-      item.p_rest = planData.p_rest;
-      item.holiday = planData.holiday;
     }
     return item;
   }
@@ -319,6 +320,8 @@ export class ReportComponent implements OnInit {
       }
       updatedItem.p_rest = rest.toFixed(2);
       updatedItem.p_work = (work - rest).toFixed(2);
+      // 総時間数集計
+      this.calTotalTime();
     }
     if (args.cell === 9) {
       this.reportClassset[args.row] = this.createClassSet(args.item);

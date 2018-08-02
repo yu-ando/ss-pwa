@@ -2,37 +2,52 @@
 <h1 class="content-title">ストレージデータ管理</h1>
 <div class="information_area">
   登録データの確認と削除、保存上限の設定変更、現在の容量を確認できます。<br/>
+  ※一度削除したデータは復元できません。十分に注意してください。<br/>
   ※各ページへのリンクで遷移した場合、このページへはブラウザバックで戻ってください。
 </div>
 <div class="information_area"></div>
-<div class="data-area" *ngFor="let key of objectkeys(storageList)">
-  <div *ngIf="key == 'sc'">
-    <div class="list-label">登録済みの日報一覧</div>
-    <div class="data-area-sub" *ngFor="let subKey of objectkeys(storageList[key])" id="sc_{{subKey.replace('月','').replace('年','/')}}">
-      <div class="list-item-label">
-        ＞{{subKey}}
-        <button type="button" class="sub-btn del_btn btn btn-outline-secondary" (click)="clearStorageMonthlySchedule(storageList[key][subKey], subKey+'の日報を全て削除しますか？')">×</button>
-      </div>
-      <div class="storage-item" *ngFor="let scKey of objectkeys(storageList[key][subKey])" id="ss_sc-{{scKey}}">
-        <a routerLink="/schedule/editor/{{scKey}}" routerLinkActive="active">{{scKey}}</a>
-        <button type="button" class="del_btn btn btn-outline-secondary" (click)="clearStorageKey('ss_sc-'+scKey, '日報データ['+scKey+']を削除しますか？')">×</button>
-      </div>
-    </div>
-  </div>
-  <div *ngIf="key == 'pl'">
-    <div class="list-label">登録済み作業予定一覧</div>
-    <div class="list-item-label" *ngFor="let plKey of objectkeys(storageList[key])" id="ss_pl-{{plKey}}">
-      ＞<a routerLink="/summary/report/{{plKey}}" routerLinkActive="active">月次集計:{{plKey}}</a>
-      <button type="button" class="sub-btn del_btn btn btn-outline-secondary" (click)="clearStorageKey('ss_pl-'+plKey, '作業予定データ['+plKey+']を削除しますか？')">×</button>
-    </div>
-  </div>
-  <div *ngIf="key == 'others'">
-    <div class="list-label">その他データ</div>
-    <div *ngFor="let otKey of objectkeys(storageList[key])">
-      {{otKey}}
-    </div>
-  </div>
-  <div *ngIf="objectkeys(storageList[key]).length == 0">
+
+<div class="data-area">
+  <div class="list-label">登録済みの日報一覧</div>
+  <div [hidden]="scheduleListHideState['none_hide']">
     <div class="no-result">該当データの登録無し</div>
+  </div>
+  <div class="data-area-sub" *ngFor="let monthKey of objectkeys(storageScheduleList)">
+    <div class="list-item-label" *ngIf="!scheduleListHideState[monthKey]['hide']">
+      ＞{{convertMonthKeyToDisplayStr(monthKey)}}
+      <button type="button" class="sub-btn del_btn btn btn-outline-secondary">×</button>
+    </div>
+    <div class="storage-item" *ngFor="let scKey of objectkeys(storageScheduleList[monthKey])">
+      <span *ngIf="!!storageScheduleList[monthKey][scKey]">
+        <a routerLink="/schedule/editor/{{storageScheduleList[monthKey][scKey]}}" routerLinkActive="active">{{storageScheduleList[monthKey][scKey]}}</a>
+        <button type="button" class="del_btn btn btn-outline-secondary" (click)="clearStorageScheduleItem(monthKey, scKey, '['+storageScheduleList[monthKey][scKey]+']の日報を削除してもよろしいですか？')">×</button>
+      </span>
+    </div>
+  </div>
+</div>
+
+<div class="data-area">
+  <div class="list-label">登録済み作業予定一覧</div>
+  <div [hidden]="planListHideState['none_hide']">
+    <div class="no-result">該当データの登録無し</div>
+  </div>
+  <div *ngFor="let plKey of objectkeys(storagePlanList)">
+    <div class="list-item-label" *ngIf="!!storagePlanList[plKey]">
+      ＞<a routerLink="/summary/report/{{storagePlanList[plKey]}}" routerLinkActive="active">月次集計:{{storagePlanList[plKey]}}</a>
+      <button type="button" class="sub-btn del_btn btn btn-outline-secondary" (click)="clearStoragePlanItem(plKey, '['+storagePlanList[plKey]+']の作業予定を削除してもよろしいですか？')">×</button>
+    </div>
+  </div>
+</div>
+
+<div class="data-area">
+  <div class="list-label">その他データ</div>
+  <div [hidden]="otherListHideState['none_hide']">
+    <div class="no-result">該当データの登録無し</div>
+  </div>
+  <div class="data-area-sub" *ngFor="let otKey of objectkeys(storageOtherList)">
+    <div class="list-item-label" *ngIf="!!storageOtherList[otKey]">
+      ＞{{otKey}}
+      <button type="button" class="sub-btn del_btn btn btn-outline-secondary" (click)="clearStorageOtherItem(otKey, '['+otKey+']のデータを削除してもよろしいですか？')">×</button>
+    </div>
   </div>
 </div>

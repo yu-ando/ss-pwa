@@ -7,23 +7,14 @@ import { Component, OnInit } from '@angular/core';
 })
 export class StorageComponent implements OnInit {
   storageScheduleList = {};
-  scheduleListHideState = {};
-
   storagePlanList = {};
-  planListHideState = {};
-
   storageOtherList = {};
-  otherListHideState = {};
+  listHideState = {};
 
-  hogehoge = {};
+  storageSizeDisplay = '';
 
   constructor() {
     this.loadStorageAllData();
-
-    this.hogehoge['test'] = true;
-  }
-  onClickHide() {
-    delete this.hogehoge['test'];
   }
 
   ngOnInit() {
@@ -37,27 +28,20 @@ export class StorageComponent implements OnInit {
    *   others: unmatch other data.
    */
   loadStorageAllData() {
-    this.storageScheduleList = {
-    };
-    this.scheduleListHideState = {
-      none_hide: false
-    };
-
-    this.storagePlanList = {
-    };
-    this.planListHideState = {
-      none_hide: false
+    this.storageScheduleList = {};
+    this.storagePlanList = {};
+    this.storageOtherList = {};
+    this.listHideState = {
+      'sc_none_hide': false,
+      'pl_none_hide': false,
+      'ot_none_hide': false,
     };
 
-    this.storageOtherList = {
-    };
-    this.otherListHideState = {
-      none_hide: false
-    };
-
+    let storageSize = '';
     const keyCount = localStorage.length;
     for (let idx = 0; idx < keyCount; idx++) {
       const storageKey = localStorage.key(idx);
+      storageSize += localStorage.getItem(storageKey);
       const keyList = storageKey.split('-');
       switch (keyList[0]) {
         case 'ss_sc':
@@ -65,31 +49,29 @@ export class StorageComponent implements OnInit {
           const monthKey = key[0]+'/'+key[1];
           if (!this.storageScheduleList[monthKey]) {
             this.storageScheduleList[monthKey] = {};
-            this.scheduleListHideState[monthKey] = {};
+            this.listHideState[monthKey] = {'show': true};
           }
           this.storageScheduleList[monthKey][storageKey] = keyList[1];
-          this.scheduleListHideState['none_hide'] = true;
-          this.scheduleListHideState[monthKey]['hide'] = false;
-          this.scheduleListHideState[monthKey][storageKey] = false;
+          this.listHideState['sc_none_hide'] = true;
           break;
         case 'ss_pl':
           this.storagePlanList[storageKey] = keyList[1];
-          this.planListHideState['none_hide'] = true;
-          this.planListHideState[storageKey] = false;
+          this.listHideState['pl_none_hide'] = true;
           break;
         default:
           this.storageOtherList[storageKey] = storageKey;
-          this.otherListHideState['none_hide'] = true;
+          this.listHideState['ot_none_hide'] = true;
           break;
       }
     }
-    console.log(this.storageScheduleList);
-    console.log(this.scheduleListHideState);
-    console.log(this.storagePlanList);
-    console.log(this.planListHideState);
-    console.log(this.storageOtherList);
-    console.log(this.otherListHideState);
+    this.storageSizeDisplay = storageSize ? 3 + ((storageSize.length*16)/(8*1024)) + ' KB' : 'Empty (0 KB)';
   }
+
+  /**
+   * monthKeyを表示用の文字列に変換する
+   * @param $monthKey 'yyyy/mm'形式の文字列
+   * @returns {string} 'yyyy年mm月'形式の文字列
+   */
   convertMonthKeyToDisplayStr($monthKey) {
     return $monthKey.replace('/', '年') + '月';
   }
@@ -102,28 +84,52 @@ export class StorageComponent implements OnInit {
     return Object.keys($obj);
   }
 
+  /**
+   * 月のscheduleItemを全て削除
+   * @param $monthKey scheduleMonthKey
+   * @param $msg confirmMessage
+   */
+  clearStorageMonthlyScheduleItems($monthKey, $msg) {
+    if (!confirm($msg)) {
+      return;
+    }
+    for (let key in this.storageScheduleList[$monthKey]) {
+      localStorage.removeItem(key);
+      delete this.storageScheduleList[$monthKey][key];
+    }
+    this.listHideState[$monthKey]['show'] = false;
+    for (let idx in this.storageScheduleList) {
+      if (this.listHideState[idx]['show']) {
+        return;
+      }
+    }
+    this.listHideState['sc_none_hide'] = false;
+  }
 
+  /**
+   * scheduleItemの削除処理
+   * @param $monthKey scheduleMonthKey
+   * @param $key localStorageKey
+   * @param $msg confirmMessage
+   */
   clearStorageScheduleItem($monthKey, $key, $msg) {
     if (!confirm($msg)) {
       return;
     }
-    console.log($monthKey, $key);
-    // localStorage.removeItem($key);
+    localStorage.removeItem($key);
     delete this.storageScheduleList[$monthKey][$key];
     for (let idx in this.storageScheduleList[$monthKey]) {
       if (!!this.storageScheduleList[$monthKey][idx]) {
         return;
       }
     }
-    console.log("month out.");
-    this.scheduleListHideState[$monthKey]['hide'] = true;
+    this.listHideState[$monthKey]['show'] = false;
     for (let idx in this.storageScheduleList) {
-      if (!this.scheduleListHideState[idx]['hide']) {
+      if (this.listHideState[idx]['show']) {
         return;
       }
     }
-    console.log("all out.");
-    this.scheduleListHideState['none_hide'] = false;
+    this.listHideState['sc_none_hide'] = false;
   }
 
   /**
@@ -142,7 +148,7 @@ export class StorageComponent implements OnInit {
         return;
       }
     }
-    this.planListHideState['none_hide'] = false;
+    this.listHideState['pl_none_hide'] = false;
   }
 
   /**
@@ -161,6 +167,6 @@ export class StorageComponent implements OnInit {
         return;
       }
     }
-    this.otherListHideState['none_hide'] = false;
+    this.listHideState['ot_none_hide'] = false;
   }
 }

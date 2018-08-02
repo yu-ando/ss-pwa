@@ -1,21 +1,21 @@
 <a class="backlink" routerLink="/config" routerLinkActive="active">＜＜設定管理へ</a>
 <h1 class="content-title">ストレージデータ管理</h1>
 <div class="information_area">
-  登録データの確認と削除、保存上限の設定変更、現在の容量を確認できます。<br/>
+  登録データの確認と削除、現在の容量を確認できます。<br/>
   ※一度削除したデータは復元できません。十分に注意してください。<br/>
   ※各ページへのリンクで遷移した場合、このページへはブラウザバックで戻ってください。
 </div>
-<div class="information_area"></div>
+<div class="information_area">localStorage使用量: {{storageSizeDisplay}}</div>
 
 <div class="data-area">
   <div class="list-label">登録済みの日報一覧</div>
-  <div [hidden]="scheduleListHideState['none_hide']">
-    <div class="no-result">該当データの登録無し</div>
+  <div [hidden]="listHideState['sc_none_hide']">
+    <div class="no-result">登録データ無し</div>
   </div>
   <div class="data-area-sub" *ngFor="let monthKey of objectkeys(storageScheduleList)">
-    <div class="list-item-label" *ngIf="!scheduleListHideState[monthKey]['hide']">
+    <div class="list-item-label" *ngIf="listHideState[monthKey]['show']">
       ＞{{convertMonthKeyToDisplayStr(monthKey)}}
-      <button type="button" class="sub-btn del_btn btn btn-outline-secondary">×</button>
+      <button type="button" class="sub-btn del_btn btn btn-outline-secondary" (click)="clearStorageMonthlyScheduleItems(monthKey, '['+convertMonthKeyToDisplayStr(monthKey)+']の日報を全て削除してもよろしいですか？')">×</button>
     </div>
     <div class="storage-item" *ngFor="let scKey of objectkeys(storageScheduleList[monthKey])">
       <span *ngIf="!!storageScheduleList[monthKey][scKey]">
@@ -28,8 +28,8 @@
 
 <div class="data-area">
   <div class="list-label">登録済み作業予定一覧</div>
-  <div [hidden]="planListHideState['none_hide']">
-    <div class="no-result">該当データの登録無し</div>
+  <div [hidden]="listHideState['pl_none_hide']">
+    <div class="no-result">登録データ無し</div>
   </div>
   <div *ngFor="let plKey of objectkeys(storagePlanList)">
     <div class="list-item-label" *ngIf="!!storagePlanList[plKey]">
@@ -41,8 +41,8 @@
 
 <div class="data-area">
   <div class="list-label">その他データ</div>
-  <div [hidden]="otherListHideState['none_hide']">
-    <div class="no-result">該当データの登録無し</div>
+  <div [hidden]="listHideState['ot_none_hide']">
+    <div class="no-result">登録データ無し</div>
   </div>
   <div class="data-area-sub" *ngFor="let otKey of objectkeys(storageOtherList)">
     <div class="list-item-label" *ngIf="!!storageOtherList[otKey]">

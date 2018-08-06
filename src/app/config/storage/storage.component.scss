@@ -19,6 +19,13 @@
   font-weight: bold;
   background-color: lightcyan;
 }
+.list-label-sub {
+  margin: 0;
+  padding: 5px;
+  font-size: 14px;
+  font-weight: bold;
+  background-color: #e7ffe9;
+}
 .list-item-label {
   margin: 0 0 0 5px;
   padding: 5px 0 0 0;
@@ -48,4 +55,8 @@
 .information_area {
   padding: 0 0 5px 5px;
   font-size: 14px;
+}
+.backup-btn {
+  font-size: 11px;
+  margin-top: 5px;
 }

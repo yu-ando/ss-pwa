@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { ScheduleService } from "../../service/schedule.service";
 
 @Component({
   selector: 'app-storage',
@@ -6,14 +7,17 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./storage.component.scss']
 })
 export class StorageComponent implements OnInit {
+  private scs: ScheduleService;
+
   storageScheduleList = {};
   storagePlanList = {};
   storageOtherList = {};
   listHideState = {};
 
-  storageSizeDisplay = '';
+  storageSize = 0;
 
-  constructor() {
+  constructor(private sc: ScheduleService) {
+    this.scs = sc;
     this.loadStorageAllData();
   }
 
@@ -37,11 +41,12 @@ export class StorageComponent implements OnInit {
       'ot_none_hide': false,
     };
 
-    let storageSize = '';
     const keyCount = localStorage.length;
     for (let idx = 0; idx < keyCount; idx++) {
       const storageKey = localStorage.key(idx);
-      storageSize += localStorage.getItem(storageKey);
+      const storageData = localStorage.getItem(storageKey);
+      this.storageSize += storageData ? ((this.getStringBytes(storageKey) + this.getStringBytes(storageData))) : 0;
+
       const keyList = storageKey.split('-');
       switch (keyList[0]) {
         case 'ss_sc':
@@ -64,7 +69,16 @@ export class StorageComponent implements OnInit {
           break;
       }
     }
-    this.storageSizeDisplay = storageSize ? 3 + ((storageSize.length*16)/(8*1024)) + ' KB' : 'Empty (0 KB)';
+  }
+
+  getStringBytes ($str) {
+    return(encodeURIComponent($str).replace(/%../g,"x").length);
+  }
+  displayStorageSize() {
+    if (this.storageSize === 0) {
+      return 'Empty(0 byte)';
+    }
+    return (this.storageSize / 1024).toFixed(2) + ' KByte';
   }
 
   /**
@@ -94,6 +108,8 @@ export class StorageComponent implements OnInit {
       return;
     }
     for (let key in this.storageScheduleList[$monthKey]) {
+      const storageData = localStorage.getItem(key);
+      this.storageSize -= storageData ? ((this.getStringBytes(key) + this.getStringBytes(storageData))) : 0;
       localStorage.removeItem(key);
       delete this.storageScheduleList[$monthKey][key];
     }
@@ -116,6 +132,8 @@ export class StorageComponent implements OnInit {
     if (!confirm($msg)) {
       return;
     }
+    const storageData = localStorage.getItem($key);
+    this.storageSize -= storageData ? ((this.getStringBytes($key) + this.getStringBytes(storageData))) : 0;
     localStorage.removeItem($key);
     delete this.storageScheduleList[$monthKey][$key];
     for (let idx in this.storageScheduleList[$monthKey]) {
@@ -141,6 +159,8 @@ export class StorageComponent implements OnInit {
     if (!confirm($msg)) {
       return;
     }
+    const storageData = localStorage.getItem($key);
+    this.storageSize -= storageData ? ((this.getStringBytes($key) + this.getStringBytes(storageData))) : 0;
     localStorage.removeItem($key);
     delete this.storagePlanList[$key];
     for (let idx in this.storagePlanList) {
@@ -160,6 +180,8 @@ export class StorageComponent implements OnInit {
     if (!confirm($msg)) {
       return;
     }
+    const storageData = localStorage.getItem($key);
+    this.storageSize -= storageData ? ((this.getStringBytes($key) + this.getStringBytes(storageData))) : 0;
     localStorage.removeItem($key);
     delete this.storageOtherList[$key];
     for (let idx in this.storageOtherList) {
@@ -168,5 +190,29 @@ export class StorageComponent implements OnInit {
       }
     }
     this.listHideState['ot_none_hide'] = false;
+  }
+
+  /**
+   * 現時点のlocalStorageバックアップファイルをダウンロードする
+   */
+  downloadBackupFile() {
+    const storageDataList = [];
+    const keyCount = localStorage.length;
+    for (let idx = 0; idx < keyCount; idx++) {
+      const storageKey = localStorage.key(idx);
+      const storageValue = localStorage.getItem(storageKey);
+      storageDataList.push({
+        key: storageKey,
+        value: storageValue
+      });
+    }
+    var blob = new Blob([JSON.stringify(storageDataList)], {type: "text/plain"});
+    var dllink = window.document.createElement('a');
+    const today = new Date();
+    dllink.download = 'ss_backup_'+today.getFullYear()+this.scs.zeroFill(today.getMonth()+1, 2)+this.scs.zeroFill(today.getDate(), 2)+'.json';
+    dllink.href = URL.createObjectURL(blob);
+    dllink.target = '_blank';
+    dllink.click();
+    console.log(dllink);
   }
 }

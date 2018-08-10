@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { ScheduleService } from "../../service/schedule.service";
 
 @Component({
@@ -14,9 +15,10 @@ export class StorageComponent implements OnInit {
   storageOtherList = {};
   listHideState = {};
 
-  storageSize = 0;
+  storageSize: number = 0;
+  importDataArea: string = '';
 
-  constructor(private sc: ScheduleService) {
+  constructor(private sc: ScheduleService, private router: Router) {
     this.scs = sc;
     this.loadStorageAllData();
   }
@@ -214,5 +216,26 @@ export class StorageComponent implements OnInit {
     dllink.target = '_blank';
     dllink.click();
     console.log(dllink);
+  }
+
+  /**
+   * localStorageを上書き更新
+   */
+  importStorageData() {
+console.log("import logic!!");
+console.log(this.importDataArea);
+    // 入力データチェック
+
+    // 確認dialog
+    if (!confirm('ストレージデータインポートを行いますか？\n※注意※\n現在の登録データはインポートするデータで上書きされ、完全に削除されます。問題がある場合は[キャンセル]をクリックして処理を中断してください。')) {
+      return;
+    }
+
+    // import実行
+    // localStorage.clear();
+
+
+    // データ再ロード
+    this.loadStorageAllData();
   }
 }

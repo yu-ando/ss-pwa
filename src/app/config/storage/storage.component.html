@@ -12,6 +12,10 @@
   <div *ngIf="storageSize <= 0">
     <div class="no-result">登録データ無し</div>
   </div>
+  <div class="list-label">ストレージデータインポート</div>
+  <span class="notice">※登録済みのデータは全て上書きされます。ご注意ください。</span>
+  <textarea [(ngModel)]="importDataArea" class="input-data-area" placeholder="※バックアップファイルの内容を全てここにコピペしてください※"></textarea>
+  <button type="button" class="import-btn btn btn-outline-secondary" (click)="importStorageData()">データインポート実行</button>
 </div>
 
 <div class="data-area">

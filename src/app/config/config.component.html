@@ -1,13 +1,27 @@
 <h1 class="content-title">設定管理</h1>
-<h2 class="menu-title">各種デフォルト設定</h2>
-<!-- ここをデフォルト設定分ループ:単一設定のもの-->
-<h3 class="config-title">編集モード</h3>
+<h2 class="menu-title">各種設定 - 確認・変更</h2>
+<h3 class="config-title">編集モード(日報入力・予定入力)</h3>
 <div class="menu-text">
-  <label><input type="radio" name="editmode" checked>&nbsp;登録・更新ボタン表示</label>&nbsp;
-  <label><input type="radio" name="editmode">&nbsp;随時登録・更新</label>&nbsp;
+  <label><input type="radio" name="editmode" value="1" [(ngModel)]="configEditorMode" (change)="changeConfig()">&nbsp;登録・更新ボタン表示</label>&nbsp;
+  <label><input type="radio" name="editmode" value="2" [(ngModel)]="configEditorMode" (change)="changeConfig()">&nbsp;随時登録・更新</label>&nbsp;
 </div>
-<!-- ここまで -->
-<br/>
+<h3 class="config-title">日報タグ設定</h3>
+<div class="menu-text">
+  <div>
+    tag1:&nbsp;<input type="text" id="tag1_name" name="tag1_name" [(ngModel)]="tagSetting['tag1']['name']" size="25" (change)="changeConfig()">
+    &nbsp;<label>入力必須:&nbsp;<input type="checkbox" id="tag1_require" name="tag1_require" [(ngModel)]="tagSetting['tag1']['require']" (change)="changeConfig()"></label>
+  </div>
+  <div>
+    tag2:&nbsp;<input type="text" id="tag2_name" name="tag2_name" [(ngModel)]="tagSetting['tag2']['name']" size="25" (change)="changeConfig()">
+    &nbsp;<label>入力必須:&nbsp;<input type="checkbox" id="tag2_require" name="tag2_require" [(ngModel)]="tagSetting['tag2']['require']" (change)="changeConfig()"></label>
+  </div>
+  <div>
+    tag3:&nbsp;<input type="text" id="tag3_name" name="tag3_name" [(ngModel)]="tagSetting['tag3']['name']" size="25" (change)="changeConfig()">
+    &nbsp;<label>入力必須:&nbsp;<input type="checkbox" id="tag3_require" name="tag3_require" [(ngModel)]="tagSetting['tag3']['require']" (change)="changeConfig()"></label>
+  </div>
+</div>
+<div><button type="button" class="save_btn btn btn-outline-primary" (click)="saveConfig()">設定の反映をする</button></div>
+<div class="notice-info"><span>※[設定の反映をする]ボタンを押して設定を保存するまで、変更内容は反映されません。</span></div>
 
 <h2 class="menu-title">ストレージデータ管理</h2>
 <div class="menu-text">

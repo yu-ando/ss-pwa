@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ScheduleService } from '../../service/schedule.service';
+import { ConfigService } from '../../service/config.service';
 import { TranslateService } from '@ngx-translate/core';
 
 import {
@@ -24,6 +25,10 @@ import {
 })
 export class EditorComponent implements OnInit {
   private scs: ScheduleService;
+  private cos: ConfigService;
+
+  editorMode = '1';
+  saveStateMsg = '';
 
   dateList = {};
   planData = {};
@@ -39,8 +44,11 @@ export class EditorComponent implements OnInit {
   categoryFormatter: Formatter = (row: number, cell: number, value: any, columnDef: Column, dataContext: any, grid?: any) => this.categoryList[value];
   categoryTotalList = {0: 0, 1: 0, 2: 0};
 
-  constructor(private router: Router, ar: ActivatedRoute, private sc: ScheduleService, private translate: TranslateService) {
+  tagSetting = {};
+
+  constructor(private router: Router, ar: ActivatedRoute, private sc: ScheduleService, private cs: ConfigService, private translate: TranslateService) {
     this.scs = sc;
+    this.cos = cs;
     let year = 0;
     let month = 0;
     let day = 0;
@@ -104,11 +112,15 @@ export class EditorComponent implements OnInit {
     this.styleSetting();
   }
   initEditorColumnDefinitions() {
+    // config load.
+    this.tagSetting = this.cos.getTagSetting(true);
+    this.editorMode = this.cos.getEditorMode();
+
     this.editorColumnDefinitions = [
-      { id: 'start', name: '開始時間', field: 'start', sortable: true, minWidth: 80, maxWidth: 80, type: FieldType.string, editor: { model: Editors.text } },
-      { id: 'end', name: '終了時間', field: 'end', sortable: true, minWidth: 80, maxWidth: 80, type: FieldType.string, editor: { model: Editors.text } },
-      { id: 'hour', name: '時間数', field: 'hour', sortable: true, minWidth: 70, maxWidth: 70 },
-      { id: 'category', name: '分類', field: 'category', sortable: true, minWidth: 100, maxWidth: 100, editor: {
+      { id: 'start', name: '開始時間', field: 'start', sortable: true, minWidth: 60, maxWidth: 60, type: FieldType.string, editor: { model: Editors.text } },
+      { id: 'end', name: '終了時間', field: 'end', sortable: true, minWidth: 60, maxWidth: 60, type: FieldType.string, editor: { model: Editors.text } },
+      { id: 'hour', name: '時間数', field: 'hour', sortable: true, minWidth: 50, maxWidth: 50 },
+      { id: 'category', name: '分類', field: 'category', minWidth: 100, maxWidth: 100, editor: {
           model: Editors.singleSelect,
           collection: Object.keys(this.categoryList).map(k => ({value: k, label: this.categoryList[k]})),
           collectionSortBy: {
@@ -119,9 +131,10 @@ export class EditorComponent implements OnInit {
         formatter: this.categoryFormatter,
         params: this.categoryList,
       },
-      { id: 'type', name: '種別', field: 'type', sortable: true, minWidth: 100, editor: { model: Editors.text } },
-      { id: 'task', name: 'タスク名', field: 'task', sortable: true, minWidth: 100, type: FieldType.string, editor: { model: Editors.text } },
-      { id: 'memo', name: 'メモ', field: 'memo', sortable: true, minWidth: 100, type: FieldType.string, editor: { model: Editors.longText } },
+      { id: 'tag1', name: this.tagSetting['tag1']['name'], field: 'tag1', minWidth: 125, maxWidth: 125, type: FieldType.string, editor: { model: Editors.text } },
+      { id: 'tag2', name: this.tagSetting['tag2']['name'], field: 'tag2', minWidth: 125, maxWidth: 125, type: FieldType.string, editor: { model: Editors.text } },
+      { id: 'tag3', name: this.tagSetting['tag3']['name'], field: 'tag3', minWidth: 125, maxWidth: 125, type: FieldType.string, editor: { model: Editors.text } },
+      { id: 'memo', name: 'メモ', field: 'memo', minWidth: 50, type: FieldType.string, editor: { model: Editors.text } },
       { id: 'del', name: '', field: '', cssClass: 'del_btn_col', minWidth: 30, maxWidth: 30, focusable: false,
         formatter: function () { return '<button type="button" class="del_btn btn btn-outline-secondary">×</button>'; } }
     ];
@@ -225,8 +238,9 @@ export class EditorComponent implements OnInit {
       end: '',
       hour: '',
       category: '',
-      type: '',
-      task: '',
+      tag1: '',
+      tag2: '',
+      tag3: '',
       memo: '',
     };
     return classSet;
@@ -249,8 +263,9 @@ export class EditorComponent implements OnInit {
         end: null,
         hour: '0.00',
         category: 0,
-        type: null,
-        task: null,
+        tag1: null,
+        tag2: null,
+        tag3: null,
         memo: null,
         del: null,
       };
@@ -285,6 +300,11 @@ export class EditorComponent implements OnInit {
     this.calTotalTime();
     // 再描画
     this.editorGridObj.gridService.renderGrid();
+
+    // editorMode '2': realtime save.
+    if (this.editorMode == '2') {
+      this.saveScheduleItem(false);
+    }
   }
   calTotalTime() {
     // 総時間数の更新
@@ -300,7 +320,7 @@ export class EditorComponent implements OnInit {
   }
   onCellClick(e, args) {
     // delete btn process.
-    if (args.cell === 7) {
+    if (args.cell === 8) {
       const row = args.row;
       if (this.editorDataset.length > 1 && confirm("[行番号: " + (row + 1) + "] 削除しますか？")) {
         const deleteItem = this.editorGridObj.gridService.getDataItemByRowNumber(row);
@@ -310,7 +330,7 @@ export class EditorComponent implements OnInit {
       }
     }
   }
-  saveScheduleItem() {
+  saveScheduleItem($alertMsgFlg = true) {
     // 現在のデータを登録する
     const saveData = [];
     let count = 1;
@@ -328,20 +348,50 @@ export class EditorComponent implements OnInit {
           stopFlg = true;
           alertMsgs = alertMsgs + '[line.'+lines+'] 開始時間と終了時間が逆転もしくは同一になっています\n';
         }
+        // 必須条件判定
+        if (this.tagSetting['tag1']['require']) {
+          console.log("tag1 require.");
+          if (!$record['tag1']) {
+            stopFlg = true;
+            alertMsgs = alertMsgs + '[line.'+lines+'] [必須条件エラー]"' + this.tagSetting['tag1']['name'] + '"を入力してください\n';
+          }
+        }
+        if (this.tagSetting['tag2']['require']) {
+          if (!$record['tag2']) {
+            stopFlg = true;
+            alertMsgs = alertMsgs + '[line.'+lines+'] [必須条件エラー]"' + this.tagSetting['tag2']['name'] + '"を入力してください\n';
+          }
+        }
+        if (this.tagSetting['tag3']['require']) {
+          if (!$record['tag3']) {
+            stopFlg = true;
+            alertMsgs = alertMsgs + '[line.'+lines+'] [必須条件エラー]"' + this.tagSetting['tag3']['name'] + '"を入力してください\n';
+          }
+        }
       }
-    });
+    }, this);
     if (saveData.length < 1) {
-      alert('保存できるデータが存在しません。' + "\n" + '"開始時間"と"終了時間"の両方が設定されているレコードが保存対象になります。');
+      if ($alertMsgFlg) {
+        alert('保存できるデータが存在しません。' + "\n" + '"開始時間"と"終了時間"の両方が設定されているレコードが保存対象になります。');
+      }
       return;
     }
     if (stopFlg) {
-      alert('入力内容に不備があります。以下の内容を確認してください。\n' + alertMsgs);
+      if ($alertMsgFlg) {
+        alert('入力内容に不備があります。以下の内容を確認してください。\n' + alertMsgs);
+      }
       return;
     }
-    this.editorDataset = saveData;
     localStorage.setItem('ss_sc-' + this.dateList['current_date'], JSON.stringify(saveData));
-    this.addBlankRow(1);
-    alert('[' + this.dateList['current_date'] + ']の日報を保存しました。');
+    if ($alertMsgFlg) {
+      // アラートメッセージ表示(editorMode='1')の場合のみデータを再セットする
+      this.editorDataset = saveData;
+      this.addBlankRow(1);
+      alert('[' + this.dateList['current_date'] + ']の日報を保存しました。');
+    } else {
+      const date = new Date();
+      this.saveStateMsg = '['+date.toLocaleTimeString()+']日報を保存しました';
+    }
   }
   addEditorRow() {
     this.addBlankRow();

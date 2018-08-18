@@ -46,6 +46,9 @@ body {
   font-size: 9px;
   padding: 1px 4px 1px 4px;
 }
+.slick-column-name {
+  font-size: 11px !important;
+}
 
 /* make sure to add the @import the SlickGrid Bootstrap Theme AFTER the variables changes */
 $cell-odd-background-color: white;

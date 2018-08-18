@@ -222,9 +222,16 @@ export class StorageComponent implements OnInit {
    * localStorageを上書き更新
    */
   importStorageData() {
-console.log("import logic!!");
-console.log(this.importDataArea);
     // 入力データチェック
+    let bkData = [];
+    if (this.importDataArea !== '') {
+      try {
+        bkData = JSON.parse(this.importDataArea);
+      } catch ($e) {
+        alert('入力データが欠損しているため、処理を中断しました。\n' + $e);
+        return;
+      }
+    }
 
     // 確認dialog
     if (!confirm('ストレージデータインポートを行いますか？\n※注意※\n現在の登録データはインポートするデータで上書きされ、完全に削除されます。問題がある場合は[キャンセル]をクリックして処理を中断してください。')) {
@@ -232,8 +239,10 @@ console.log(this.importDataArea);
     }
 
     // import実行
-    // localStorage.clear();
-
+    localStorage.clear();
+    for (let idx = 0; idx < bkData.length; idx++) {
+      localStorage.setItem(bkData[idx].key, bkData[idx].value);
+    }
 
     // データ再ロード
     this.loadStorageAllData();

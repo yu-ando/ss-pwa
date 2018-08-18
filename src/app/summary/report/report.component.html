@@ -11,7 +11,8 @@
     　実総作業時間数: <span>{{timeTotalList['work'].toFixed(2)}}h</span> |
     　実総除外時間数: <span>{{timeTotalList['rest'].toFixed(2)}}h</span>
 </div>
-<button type="button" class="save_btn btn btn-outline-primary" (click)="savePlanItem()">予定を登録・更新</button>
+<button type="button" class="save_btn btn btn-outline-primary" (click)="savePlanItem()" *ngIf="editorMode==='1'">予定を登録・更新</button>
+<div class="editor-option-label" *ngIf="editorMode==='2'">※予定情報を変更するごとにデータが保存されます:&nbsp;<span class="save-state">{{saveStateMsg}}</span></div>
 <div class="report-viewer">
     <angular-slickgrid
         gridId="report"

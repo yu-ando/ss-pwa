@@ -3,6 +3,7 @@ import {AngularGridInstance, Column, Editors, FieldType, Formatter, Formatters, 
 import {TranslateService} from "@ngx-translate/core";
 import {ActivatedRoute, Router} from "@angular/router";
 import {ScheduleService} from "../../service/schedule.service";
+import {ConfigService} from "../../service/config.service";
 
 @Component({
   selector: 'app-report',
@@ -11,6 +12,10 @@ import {ScheduleService} from "../../service/schedule.service";
 })
 export class ReportComponent implements OnInit {
   private scs: ScheduleService;
+  private cos: ConfigService;
+
+  editorMode = '1';
+  saveStateMsg = '';
 
   dateList = {};
   reportGridObj: AngularGridInstance;
@@ -20,8 +25,10 @@ export class ReportComponent implements OnInit {
   reportClassset: any[] = [];
   timeTotalList = {0: 0, 1: 0, 2: 0};
 
-  constructor(private router: Router, ar: ActivatedRoute, private sc: ScheduleService, private translate: TranslateService) {
+  constructor(private router: Router, ar: ActivatedRoute, private sc: ScheduleService, private cs: ConfigService, private translate: TranslateService) {
     this.scs = sc;
+    this.cos = cs;
+
     let year = 0;
     let month = 0;
     ar.params.subscribe(params => {
@@ -107,6 +114,9 @@ export class ReportComponent implements OnInit {
     };
   }
   loadReportData() {
+    // config load.
+    this.editorMode = this.cos.getEditorMode(true);
+
     // data reset.
     this.reportDataset = [];
     this.reportClassset = [];
@@ -131,7 +141,7 @@ export class ReportComponent implements OnInit {
       current.setDate(day);
 
       let scheduleData = null;
-      const savedData = localStorage.getItem('ss_' + this.dateList['current_date'] + '/' + day);
+      const savedData = localStorage.getItem('ss_sc-' + this.dateList['current_date'] + '/' + day);
       if (savedData !== null) {
         try {
           // 日報データあり
@@ -279,7 +289,7 @@ export class ReportComponent implements OnInit {
       this.timeTotalList['p_rest'] += Number($item.p_rest);
     }, this);
   }
-  savePlanItem() {
+  savePlanItem($alertMsgFlg = true) {
     // 現在のデータを登録する
     let count = 0;
     const saveData = {};
@@ -295,11 +305,18 @@ export class ReportComponent implements OnInit {
       count++;
     });
     if (count < 1) {
-      alert('保存できるデータが存在しません。' + "\n" + '"予定開始","予定終了","予定除外"の全てが設定されているレコードが保存対象になります。');
+      if ($alertMsgFlg) {
+        alert('保存できるデータが存在しません。' + "\n" + '"予定開始","予定終了","予定除外"の全てが設定されているレコードが保存対象になります。');
+      }
       return;
     }
     localStorage.setItem('ss_pl-' + this.dateList['current_date'], JSON.stringify(saveData));
-    alert('[' + this.dateList['current_date'] + ']の作業予定を保存しました。');
+    if ($alertMsgFlg) {
+      alert('[' + this.dateList['current_date'] + ']の作業予定を保存しました。');
+    } else {
+      const date = new Date();
+      this.saveStateMsg = '['+date.toLocaleTimeString()+']予定情報を保存しました';
+    }
   }
   onCellChanged(e, args) {
     // 作業予定変更
@@ -328,5 +345,10 @@ export class ReportComponent implements OnInit {
       this.styleSetting();
     }
     this.reportGridObj.gridService.renderGrid();
+
+    // editorMode '2': realtime save.
+    if (this.editorMode == '2') {
+      this.savePlanItem(false);
+    }
   }
 }

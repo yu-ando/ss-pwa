@@ -6,6 +6,7 @@ import { ConfigRoutingModule } from './config-routing.module';
 import { ConfigComponent } from './config.component';
 import { StorageComponent } from './storage/storage.component';
 import { ScheduleService } from "../service/schedule.service";
+import { ConfigService } from "../service/config.service";
 
 @NgModule({
   imports: [
@@ -18,7 +19,8 @@ import { ScheduleService } from "../service/schedule.service";
     StorageComponent
   ],
   providers: [
-    ScheduleService
+    ScheduleService,
+    ConfigService
   ]
 })
 export class ConfigModule { }

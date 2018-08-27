@@ -1,0 +1,8 @@
+<div class="nav-area">
+  <a class="nav-link-left" routerLink="/summary/analyzer/{{dateList['past_date']}}" (click)="changeCurrentDate(dateList['past_year'], dateList['past_month'])">＜＜ [ {{dateList['past_date']}} ]</a>
+  <a class="nav-link-right" routerLink="/summary/analyzer/{{dateList['next_date']}}" (click)="changeCurrentDate(dateList['next_year'], dateList['next_month'])">[ {{dateList['next_date']}} ] ＞＞</a>
+</div>
+<h1 class="content-title">{{dateList['current_year']}}年{{dateList['current_month']}}月 詳細解析情報</h1>
+<div class="back-link">
+  <a routerLink="/summary/report/{{dateList['current_date']}}">＜＜予定&実績集計に戻る</a>
+</div>

@@ -9,6 +9,7 @@ import { TranslateModule } from '@ngx-translate/core';
 
 import { ScheduleService } from '../service/schedule.service';
 import { ConfigService } from "../service/config.service";
+import { AnalyzerComponent } from './analyzer/analyzer.component';
 
 @NgModule({
   imports: [
@@ -18,7 +19,8 @@ import { ConfigService } from "../service/config.service";
     AngularSlickgridModule.forRoot()
   ],
   declarations: [
-    ReportComponent
+    ReportComponent,
+    AnalyzerComponent
   ],
   providers: [
     ScheduleService,

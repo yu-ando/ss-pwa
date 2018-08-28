@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { ScheduleService } from "../../service/schedule.service";
+import { ScheduleService } from '../../service/schedule.service';
 
 @Component({
   selector: 'app-storage',
@@ -15,8 +15,8 @@ export class StorageComponent implements OnInit {
   storageOtherList = {};
   listHideState = {};
 
-  storageSize: number = 0;
-  importDataArea: string = '';
+  storageSize = 0;
+  importDataArea = '';
 
   constructor(private sc: ScheduleService, private router: Router) {
     this.scs = sc;
@@ -53,7 +53,7 @@ export class StorageComponent implements OnInit {
       switch (keyList[0]) {
         case 'ss_sc':
           const key = keyList[1].split('/');
-          const monthKey = key[0]+'/'+key[1];
+          const monthKey = key[0] + '/' + key[1];
           if (!this.storageScheduleList[monthKey]) {
             this.storageScheduleList[monthKey] = {};
             this.listHideState[monthKey] = {'show': true};
@@ -74,7 +74,7 @@ export class StorageComponent implements OnInit {
   }
 
   getStringBytes ($str) {
-    return(encodeURIComponent($str).replace(/%../g,"x").length);
+    return(encodeURIComponent($str).replace(/%../g, 'x').length);
   }
   displayStorageSize() {
     if (this.storageSize === 0) {
@@ -208,14 +208,13 @@ export class StorageComponent implements OnInit {
         value: storageValue
       });
     }
-    var blob = new Blob([JSON.stringify(storageDataList)], {type: "text/plain"});
-    var dllink = window.document.createElement('a');
+    const blob = new Blob([JSON.stringify(storageDataList)], {type: 'text/plain'});
+    const dllink = window.document.createElement('a');
     const today = new Date();
-    dllink.download = 'ss_backup_'+today.getFullYear()+this.scs.zeroFill(today.getMonth()+1, 2)+this.scs.zeroFill(today.getDate(), 2)+'.json';
+    dllink.download = 'ss_backup_' + today.getFullYear() + this.scs.zeroFill(today.getMonth() + 1, 2) + this.scs.zeroFill(today.getDate(), 2) + '.json';
     dllink.href = URL.createObjectURL(blob);
     dllink.target = '_blank';
     dllink.click();
-    console.log(dllink);
   }
 
   /**

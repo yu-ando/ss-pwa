@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { ConfigComponent } from "./config.component";
-import { StorageComponent } from "./storage/storage.component";
+import { ConfigComponent } from './config.component';
+import { StorageComponent } from './storage/storage.component';
 
 const routes: Routes = [
   { path: 'storage', component: StorageComponent },

@@ -8,7 +8,7 @@ import { AngularSlickgridModule } from 'angular-slickgrid';
 import { TranslateModule } from '@ngx-translate/core';
 
 import { ScheduleService } from '../service/schedule.service';
-import { ConfigService } from "../service/config.service";
+import { ConfigService } from '../service/config.service';
 import { AnalyzerComponent } from './analyzer/analyzer.component';
 
 @NgModule({

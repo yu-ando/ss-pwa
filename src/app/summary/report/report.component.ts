@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import {AngularGridInstance, Column, Editors, FieldType, Formatter, Formatters, GridOption} from 'angular-slickgrid';
-import {TranslateService} from "@ngx-translate/core";
-import {ActivatedRoute, Router} from "@angular/router";
-import {ScheduleService} from "../../service/schedule.service";
-import {ConfigService} from "../../service/config.service";
+import {TranslateService} from '@ngx-translate/core';
+import {ActivatedRoute, Router} from '@angular/router';
+import {ScheduleService} from '../../service/schedule.service';
+import {ConfigService} from '../../service/config.service';
 
 @Component({
   selector: 'app-report',
@@ -86,7 +86,7 @@ export class ReportComponent implements OnInit {
       { id: 'p_start', name: '予定開始', field: 'p_start', sortable: false, minWidth: 80, type: FieldType.string, editor: { model: Editors.text }},
       { id: 'p_end', name: '予定終了', field: 'p_end', sortable: false, minWidth: 80, type: FieldType.string, editor: { model: Editors.text }},
       { id: 'p_rest', name: '予定除外', field: 'p_rest', sortable: false, minWidth: 80, type: FieldType.string, editor: { model: Editors.text }},
-      { id: 'holiday', name: '休日', field: 'holiday', minWidth: 50, maxWidth: 50, cssClass: "ac", type: FieldType.integer, formatter: Formatters.checkmark, editor: { model: Editors.checkbox }}
+      { id: 'holiday', name: '休日', field: 'holiday', minWidth: 50, maxWidth: 50, cssClass: 'ac', type: FieldType.integer, formatter: Formatters.checkmark, editor: { model: Editors.checkbox }}
     ];
   }
   initReportGridOptions() {
@@ -166,7 +166,7 @@ export class ReportComponent implements OnInit {
   }
   styleSetting() {
     // css_styleを設定
-    this.reportGridObj.slickGrid.setCellCssStyles("", this.reportClassset);
+    this.reportGridObj.slickGrid.setCellCssStyles('', this.reportClassset);
   }
 
   /**
@@ -315,7 +315,7 @@ export class ReportComponent implements OnInit {
       alert('[' + this.dateList['current_date'] + ']の作業予定を保存しました。');
     } else {
       const date = new Date();
-      this.saveStateMsg = '['+date.toLocaleTimeString()+']予定情報を保存しました';
+      this.saveStateMsg = '[' + date.toLocaleTimeString() + ']予定情報を保存しました';
     }
   }
   onCellChanged(e, args) {
@@ -328,7 +328,7 @@ export class ReportComponent implements OnInit {
       if (args.cell === 7) {
         updatedItem.p_end = this.scs.formatTimeString(this.scs.convertToHankaku(args.item.p_end));
       }
-      let work = this.scs.calWorkHour(updatedItem.p_start, updatedItem.p_end);
+      const work = this.scs.calWorkHour(updatedItem.p_start, updatedItem.p_end);
       let rest = Number(this.scs.convertToHankaku(updatedItem.p_rest));
       if (!rest) {
         // 休憩時間のフォーマットが数字以外の場合は"0.00"に差し替え
@@ -347,7 +347,7 @@ export class ReportComponent implements OnInit {
     this.reportGridObj.gridService.renderGrid();
 
     // editorMode '2': realtime save.
-    if (this.editorMode == '2') {
+    if (this.editorMode === '2') {
       this.savePlanItem(false);
     }
   }

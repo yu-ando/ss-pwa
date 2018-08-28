@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import {ScheduleService} from "../../service/schedule.service";
-import {ActivatedRoute, Router} from "@angular/router";
-import {ConfigService} from "../../service/config.service";
+import { ActivatedRoute, Router } from '@angular/router';
+import { ScheduleService } from '../../service/schedule.service';
+import { ConfigService } from '../../service/config.service';
 
 @Component({
   selector: 'app-analyzer',

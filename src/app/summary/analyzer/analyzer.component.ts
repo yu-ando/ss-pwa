@@ -3,21 +3,23 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ScheduleService } from '../../service/schedule.service';
 import { ConfigService } from '../../service/config.service';
 
+import { SimpleModalService } from 'ngx-simple-modal';
+import { CondModalComponent } from './cond-modal.component';
+
 @Component({
   selector: 'app-analyzer',
   templateUrl: './analyzer.component.html',
   styleUrls: ['./analyzer.component.scss']
 })
 export class AnalyzerComponent implements OnInit {
-  private scs: ScheduleService;
-  private cos: ConfigService;
 
   dateList = {};
 
-  constructor(private router: Router, ar: ActivatedRoute, private sc: ScheduleService, private cs: ConfigService) {
-    this.scs = sc;
-    this.cos = cs;
-
+  constructor(
+      private router: Router, ar: ActivatedRoute,
+      private scheduleService: ScheduleService,
+      private configService: ConfigService,
+      private simpleModalService: SimpleModalService) {
     let year = 0;
     let month = 0;
     ar.params.subscribe(params => {
@@ -56,5 +58,17 @@ export class AnalyzerComponent implements OnInit {
   changeCurrentDate($year, $month) {
     this.setDateList($year, $month);
 //    this.loadReportData();
+  }
+
+  confirmResult = null;
+
+  showConfirm() {
+    this.simpleModalService.addModal(CondModalComponent, {
+      title: '確認',
+      message: 'どうしますか?'})
+      .subscribe((isConfirmed) => {
+          // Get modal result
+          this.confirmResult = isConfirmed;
+      });
   }
 }

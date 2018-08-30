@@ -11,20 +11,26 @@ import { ScheduleService } from '../service/schedule.service';
 import { ConfigService } from '../service/config.service';
 import { AnalyzerComponent } from './analyzer/analyzer.component';
 
+import { SimpleModalModule } from 'ngx-simple-modal';
+import { CondModalComponent } from './analyzer/cond-modal.component';
+
 @NgModule({
   imports: [
     CommonModule,
     SummaryRoutingModule,
     TranslateModule.forRoot(),
-    AngularSlickgridModule.forRoot()
+    AngularSlickgridModule.forRoot(),
+    SimpleModalModule
   ],
   declarations: [
     ReportComponent,
-    AnalyzerComponent
+    AnalyzerComponent,
+    CondModalComponent
   ],
   providers: [
     ScheduleService,
     ConfigService
-  ]
+  ],
+  entryComponents: [CondModalComponent]
 })
 export class SummaryModule { }

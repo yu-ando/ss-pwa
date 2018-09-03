@@ -197,7 +197,7 @@ export class StorageComponent implements OnInit {
   /**
    * 現時点のlocalStorageバックアップファイルをダウンロードする
    */
-  downloadBackupFile() {
+  downloadBackupFile($event) {
     const storageDataList = [];
     const keyCount = localStorage.length;
     for (let idx = 0; idx < keyCount; idx++) {
@@ -209,10 +209,12 @@ export class StorageComponent implements OnInit {
       });
     }
     const blob = new Blob([JSON.stringify(storageDataList)], {type: 'text/plain'});
-    const dllink = window.document.createElement('a');
+    const dllink = $event.target;
     const today = new Date();
-    dllink.download = 'ss_backup_' + today.getFullYear() + this.scs.zeroFill(today.getMonth() + 1, 2) + this.scs.zeroFill(today.getDate(), 2) + '.json';
-    dllink.href = URL.createObjectURL(blob);
+    dllink.download = 'ss_backup_' + today.getFullYear()
+        + this.scs.zeroFill(today.getMonth() + 1, 2)
+        + this.scs.zeroFill(today.getDate(), 2) + '.json';
+    dllink.href = window.URL.createObjectURL(blob);
     dllink.target = '_blank';
     dllink.click();
   }
@@ -238,12 +240,14 @@ export class StorageComponent implements OnInit {
     }
 
     // import実行
-    localStorage.clear();
     for (let idx = 0; idx < bkData.length; idx++) {
       localStorage.setItem(bkData[idx].key, bkData[idx].value);
     }
 
     // データ再ロード
     this.loadStorageAllData();
+
+    // 読み込み完了
+    alert('ストレージデータインポートが完了しました。');
   }
 }

@@ -8,7 +8,7 @@
 
 <div class="data-area">
   <div class="list-label">ストレージデータバックアップ</div>
-  <button type="button" class="backup-btn btn btn-outline-secondary" (click)="downloadBackupFile()" *ngIf="storageSize > 0">バックアップファイルダウンロード</button>
+  <a id="dllink" href="javascript:void(0);" download="" class="backup-btn btn btn-outline-secondary" (click)="downloadBackupFile($event)" *ngIf="storageSize > 0">バックアップファイルダウンロード</a>
   <div *ngIf="storageSize <= 0">
     <div class="no-result">登録データ無し</div>
   </div>

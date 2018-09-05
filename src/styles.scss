@@ -53,6 +53,10 @@ body {
 .slick-column-name {
   font-size: 11px !important;
 }
+.cell-reorder {
+  cursor: move !important;
+  background: url("assets/drag-handle.png") no-repeat center center !important;
+}
 
 /* loader style */
 .loader {

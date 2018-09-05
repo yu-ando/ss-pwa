@@ -110,6 +110,102 @@ export class EditorComponent implements OnInit {
   editorReady(angularGrid: AngularGridInstance) {
     this.editorGridObj = angularGrid;
     this.styleSetting();
+
+    // @ts-ignore: AngularSlickgrid unsupported Slick.RowMoveManager
+    var moveRowsPlugin = new window.Slick.RowMoveManager({
+      cancelEditOnDrag: true
+    });
+    moveRowsPlugin.onBeforeMoveRows.subscribe(function (e, data) {
+      for (var i = 0; i < data.rows.length; i++) {
+        // no point in moving before or after itself
+        if (data.rows[i] == data.insertBefore || data.rows[i] == data.insertBefore - 1) {
+          e.stopPropagation();
+          return false;
+        }
+      }
+      return true;
+    });
+    var _self = this;
+    moveRowsPlugin.onMoveRows.subscribe(function (e, args) {
+      const selectedRowNum = args.rows[0];
+      const insertBeforeCount = args.insertBefore;
+      const target = _self.editorDataset[selectedRowNum];
+      let movedDataset = [];
+      for (var i = 0; i < _self.editorDataset.length; ++i) {
+        if (i === selectedRowNum) {
+          continue;
+        }
+        movedDataset.push(_self.editorDataset[i]);
+        if ((i + 1) === insertBeforeCount) {
+          movedDataset.push(target);
+        }
+      }
+      _self.editorDataset = movedDataset;
+      _self.editorGridObj.slickGrid.resetActiveCell();
+      _self.editorGridObj.slickGrid.setData(_self.editorDataset);
+      _self.editorGridObj.slickGrid.setSelectedRows(selectedRowNum);
+      _self.editorGridObj.slickGrid.render();
+    });
+    this.editorGridObj.slickGrid.registerPlugin(moveRowsPlugin);
+
+    this.editorGridObj.slickGrid.onDragInit.subscribe(function (e, dd) {
+      // prevent the grid from cancelling drag'n'drop by default
+      e.stopImmediatePropagation();
+    });
+//     this.editorGridObj.slickGrid.onDragStart.subscribe(function (e, dd) {
+// console.log(e, dd);
+// console.log(dd.grid);
+//       var cell = dd.grid.getCellFromEvent(e);
+//       if (!cell) {
+//         return;
+//       }
+//       dd.row = cell.row;
+//       // if (!this.editorDataset[dd.row]) {
+//       //   return;
+//       // }
+//       if (window.Slick.GlobalEditorLock.isActive()) {
+//         return;
+//       }
+//       e.stopImmediatePropagation();
+//       dd.mode = "recycle";
+//       var selectedRows = dd.grid.getSelectedRows();
+//       if (!selectedRows.length || $.inArray(dd.row, selectedRows) == -1) {
+//         selectedRows = [dd.row];
+//         dd.grid.setSelectedRows(selectedRows);
+//       }
+//       dd.rows = selectedRows;
+//       dd.count = selectedRows.length;
+//       var proxy = $("<span></span>")
+//         .css({
+//           position: "absolute",
+//           display: "inline-block",
+//           padding: "4px 10px",
+//           background: "#e0e0e0",
+//           border: "1px solid gray",
+//           "z-index": 99999,
+//           "-moz-border-radius": "8px",
+//           "-moz-box-shadow": "2px 2px 6px silver"
+//         })
+//         .text("Drag to Recycle Bin to delete " + dd.count + " selected row(s)")
+//         .appendTo("body");
+//       dd.helper = proxy;
+//       $(dd.available).css("background", "pink");
+//       return proxy;
+//     });
+//     this.editorGridObj.slickGrid.onDrag.subscribe(function (e, dd) {
+//       if (dd.mode != "recycle") {
+//         return;
+//       }
+//       dd.helper.css({top: e.pageY + 5, left: e.pageX + 5});
+//     });
+//     this.editorGridObj.slickGrid.onDragEnd.subscribe(function (e, dd) {
+//       if (dd.mode != "recycle") {
+//         return;
+//       }
+//       dd.helper.remove();
+//       // $(dd.available).css("background", "beige");
+//     });
+
   }
   initEditorColumnDefinitions() {
     // config load.
@@ -117,6 +213,8 @@ export class EditorComponent implements OnInit {
     this.editorMode = this.cos.getEditorMode();
 
     this.editorColumnDefinitions = [
+      // @ts-ignore: AngularSlickgrid Column unsupported 'behavior'
+      { id: '#', name: '', field: '', behavior: 'selectAndMove', width: 40, selectable: false, resizable: false, cssClass: 'cell-reorder dnd' },
       { id: 'start', name: '開始時間', field: 'start', sortable: true, minWidth: 60, maxWidth: 60, type: FieldType.string, editor: { model: Editors.text } },
       { id: 'end', name: '終了時間', field: 'end', sortable: true, minWidth: 60, maxWidth: 60, type: FieldType.string, editor: { model: Editors.text } },
       { id: 'hour', name: '時間数', field: 'hour', sortable: true, minWidth: 50, maxWidth: 50 },
@@ -159,6 +257,7 @@ export class EditorComponent implements OnInit {
       enableHeaderButton: false,
       enableRowSelection: true,
       enableAddRow: false,
+      forceFitColumns: true,
     };
   }
   changeAutoEdit() {
@@ -274,12 +373,12 @@ export class EditorComponent implements OnInit {
     }
   }
   onCellChanged(e, args) {
-    if (args.cell === 0 || args.cell === 1) {
+    if (args.cell === 1 || args.cell === 2) {
       const editRowItem = this.editorGridObj.gridService.getDataItemByRowNumber(args.row);
-      if (args.cell === 0) { // 開始時間
+      if (args.cell === 1) { // 開始時間
         editRowItem.start = this.scs.formatTimeString(this.scs.convertToHankaku(args.item.start));
       }
-      if (args.cell === 1) { // 終了時間
+      if (args.cell === 2) { // 終了時間
         editRowItem.end = this.scs.formatTimeString(this.scs.convertToHankaku(args.item.end));
         // 次の行の開始時間を変更する
         const nextRowItem = this.editorGridObj.gridService.getDataItemByRowNumber(args.row + 1);

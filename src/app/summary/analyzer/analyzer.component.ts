@@ -12,8 +12,8 @@ import { CondModalComponent } from './cond-modal.component';
   styleUrls: ['./analyzer.component.scss']
 })
 export class AnalyzerComponent implements OnInit {
-
   dateList = {};
+  analyzeConditions = {};
 
   isLoading = false;
   isResult = false;
@@ -55,6 +55,10 @@ export class AnalyzerComponent implements OnInit {
   }
 
   ngOnInit() {
+    // debug.
+    this.analyzeConditions = {
+      change: false,
+    };
   }
 
   // change analyze date.
@@ -63,15 +67,13 @@ export class AnalyzerComponent implements OnInit {
 //    this.loadReportData();
   }
 
-  confirmResult = null;
-
+  // 解析条件設定ダイアログの表示と結果反映
   showConfirm() {
     this.simpleModalService.addModal(CondModalComponent, {
-      title: '確認',
-      message: 'どうしますか?'})
-      .subscribe((isConfirmed) => {
+      analyzeConditions: this.analyzeConditions})
+      .subscribe((conditions) => {
           // Get modal result
-          this.confirmResult = isConfirmed;
+          this.analyzeConditions = conditions;
       });
   }
 

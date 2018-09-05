@@ -54,6 +54,19 @@ body {
   font-size: 11px !important;
 }
 
+/* loader style */
+.loader {
+  width: 100%;
+  text-align: center;
+  margin: 10px 0;
+}
+.loader-img {
+  display: inline-block;
+}
+.loader-label {
+  display: block;
+}
+
 /* make sure to add the @import the SlickGrid Bootstrap Theme AFTER the variables changes */
 $cell-odd-background-color: white;
 $row-mouse-hover-color: lightgreen;

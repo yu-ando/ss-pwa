@@ -15,6 +15,9 @@ export class AnalyzerComponent implements OnInit {
 
   dateList = {};
 
+  isLoading = false;
+  isResult = false;
+
   constructor(
       private router: Router, ar: ActivatedRoute,
       private scheduleService: ScheduleService,
@@ -70,5 +73,18 @@ export class AnalyzerComponent implements OnInit {
           // Get modal result
           this.confirmResult = isConfirmed;
       });
+  }
+
+  /* loading sample. */
+  loading($event) {
+    console.log($event);
+    console.log('loading now!!');
+    this.isResult = false;
+    this.isLoading = true;
+    setTimeout(function($obj) {
+      console.log('loading end!!');
+      $obj.isLoading = false;
+      $obj.isResult = true;
+    }, 2000, this);
   }
 }

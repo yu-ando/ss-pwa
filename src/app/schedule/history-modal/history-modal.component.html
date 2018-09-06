@@ -1,15 +1,35 @@
 <div class="modal-content">
   <div class="modal-header">
-    <h4>履歴から予定を追加</h4>
+    <div class="title">履歴から予定を追加</div>
   </div>
-  <div class="modal-header">
-    <p></p>
+  <div class="modal-header condition_area">
+    <span class="condition_btn"><button type="button" class="btn btn-dark" (click)="showYesterday()">昨日を表示</button></span>
+    <span class="condition_btn"><button type="button" class="btn btn-dark" (click)="showLastWeek()">先週を表示</button></span>
+    <mat-form-field>
+      <input matInput [matDatepicker]="dp" placeholder="表示する日付" [(ngModel)]="selectDate">
+      <mat-datepicker-toggle matSuffix [for]="dp"></mat-datepicker-toggle>
+      <mat-datepicker #dp></mat-datepicker>
+    </mat-form-field>
+    <span class="condition_btn"><button type="button" class="btn btn-dark" (click)="showTargetDate()">指定日を表示</button></span>
   </div>
-  <div class="modal-body">
-    <p>{{message || 'Are you sure?'}}</p>
+  <div class="history_area" *ngIf="!historyList">
+    <div class="history_dummy">履歴を表示する対象を選択してください。</div>
+  </div>
+  <div class="history_area" *ngIf="!!historyList">
+    <div class="control_link">
+      <a class="fr" href="javascript:void(0)" (click)="showTargetAfter()">次の日＞＞</a>
+      <a href="javascript:void(0)" (click)="showTargetBefore()">＜＜前の日</a>
+    </div>
+    <div class="title">{{viewDate}}の日報</div>
+    <div class="history_list">
+      <div *ngIf="historyList.length < 1">この日の日報は登録されていません</div>
+      <div *ngFor="let item of historyList">
+        {{item}}
+      </div>
+    </div>
   </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-primary" (click)="confirm()">この条件で解析する</button>
-    <button type="button" class="btn btn-outline-danger" (click)="cancel()">キャンセル</button>
+    <button type="button" class="btn btn-primary" (click)="confirm()">選択した予定をコピーする</button>
+    <button type="button" class="btn btn-outline-danger" (click)="cancel()">閉じる</button>
   </div>
 </div>

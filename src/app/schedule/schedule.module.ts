@@ -13,13 +13,26 @@ import { ConfigService } from '../service/config.service';
 import { SimpleModalModule } from 'ngx-simple-modal';
 import { HistoryModalComponent } from './history-modal/history-modal.component';
 
+import { MatNativeDateModule, MatInputModule } from '@angular/material';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms'
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MomentDateModule } from "@angular/material-moment-adapter";
+
 @NgModule({
   imports: [
     CommonModule,
     ScheduleRoutingModule,
     TranslateModule.forRoot(),
     AngularSlickgridModule.forRoot(),
-    SimpleModalModule
+    SimpleModalModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatFormFieldModule,
+    MatInputModule,
+    FormsModule,
+    ReactiveFormsModule,
+    MomentDateModule
   ],
   declarations: [
     EditorComponent,

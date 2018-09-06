@@ -62,4 +62,27 @@ export class ScheduleService {
       return String.fromCharCode(s.charCodeAt(0) - 65248);
     });
   }
+
+  /* ------------------------------------------- *
+   *  localStorage Controllers
+   * ------------------------------------------- */
+  /**
+   * 指定日付のデータを取得する
+   * 取得できない場合は空配列を返す
+   * @param string $date YYYY/MM/DD ロードする日付文字列
+   * @return array schedule_data
+   */
+  loadSchedule($date) {
+    const storageKey = 'ss_sc-' + $date;
+    const savedData = localStorage.getItem(storageKey);
+    let result = [];
+    if (savedData !== null) {
+      try {
+        result = JSON.parse(savedData);
+      } catch ($e) {
+        console.log($e);
+      }
+    }
+    return result;
+  }
 }

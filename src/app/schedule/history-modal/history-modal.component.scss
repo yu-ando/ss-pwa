@@ -1,0 +1,47 @@
+.modal-header {
+  height: 45px;
+  margin: 0 0 15px 0;
+  & .title {
+    font-size: 18px;
+    font-weight: bold;
+  }
+}
+.condition_area {
+  .condition_btn {
+    margin: 0 15px 0 5px;
+    & button {
+      font-size: 9px;
+    }
+  }
+}
+.history_area {
+  min-height: 300px;
+  margin: 0 10px 0 10px;
+  font-size: 12px;
+  & .history_dummy {
+    padding: 3px 0 0 0;
+  }
+  & .title {
+    font-size: 14px;
+    font-weight: bold;
+    width: 100%;
+    border-bottom: darkgray solid 1px;
+  }
+
+  .control_link {
+    & a {
+      font-size: 11px;
+    }
+    & .fr {
+      float: right;
+      & :after {
+        clear: both;
+      }
+    }
+  }
+}
+.modal-footer {
+  & button {
+    font-size: 9px;
+  }
+}

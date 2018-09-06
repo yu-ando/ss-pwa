@@ -14,8 +14,11 @@
   {{categoryList[1]}}時間数: <span>{{categoryTotalList[1].toFixed(2)}}h</span> |
   {{categoryList[2]}}時間数: <span>{{categoryTotalList[2].toFixed(2)}}h</span>
 </div>
-<button type="button" class="save_btn btn btn-outline-primary" (click)="saveScheduleItem()" *ngIf="editorMode==='1'">登録・更新</button>
-<button type="button" class="add_btn btn btn-outline-secondary" (click)="addEditorRow()">++行追加++</button>
+<div>
+<span><button type="button" class="save_btn btn btn-outline-primary" (click)="saveScheduleItem()" *ngIf="editorMode==='1'">登録・更新</button></span>
+<span class="right_btn"><button type="button" class="add_btn btn btn-outline-secondary" (click)="addEditorRow()">++行追加++</button></span>
+<span class="right_btn"><button type="button" class="add_btn btn btn-outline-secondary" (click)="showHistoryModal()">履歴から予定を追加</button></span>
+</div>
 <div class="editor-option" *ngIf="editorMode==='2'">
 <span class="editor-option-label">※予定情報を変更するごとにデータが保存されます:&nbsp;<span class="save-state">{{saveStateMsg}}</span></span>
 </div>

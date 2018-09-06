@@ -6,7 +6,8 @@ import { AnalyzerComponent } from './analyzer/analyzer.component';
 const routes: Routes = [
   { path: 'report/:year/:month', component: ReportComponent },
   { path: 'report', component: ReportComponent },
-  { path: 'analyzer/:year/:month', component: AnalyzerComponent }
+  { path: 'analyzer/:year/:month', component: AnalyzerComponent },
+  { path: 'analyzer', component: AnalyzerComponent }
 ];
 
 @NgModule({

@@ -10,19 +10,27 @@ import { TranslateModule } from '@ngx-translate/core';
 import { ScheduleService } from '../service/schedule.service';
 import { ConfigService } from '../service/config.service';
 
+import { SimpleModalModule } from 'ngx-simple-modal';
+import { HistoryModalComponent } from './history-modal/history-modal.component';
+
 @NgModule({
   imports: [
     CommonModule,
     ScheduleRoutingModule,
     TranslateModule.forRoot(),
-    AngularSlickgridModule.forRoot()
+    AngularSlickgridModule.forRoot(),
+    SimpleModalModule
   ],
   declarations: [
-    EditorComponent
+    EditorComponent,
+    HistoryModalComponent
   ],
   providers: [
     ScheduleService,
     ConfigService
+  ],
+  entryComponents: [
+    HistoryModalComponent
   ]
 })
 export class ScheduleModule { }

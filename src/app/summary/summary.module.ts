@@ -31,6 +31,8 @@ import { CondModalComponent } from './analyzer/cond-modal.component';
     ScheduleService,
     ConfigService
   ],
-  entryComponents: [CondModalComponent]
+  entryComponents: [
+    CondModalComponent
+  ]
 })
 export class SummaryModule { }

@@ -4,6 +4,9 @@ import { ScheduleService } from '../../service/schedule.service';
 import { ConfigService } from '../../service/config.service';
 import { TranslateService } from '@ngx-translate/core';
 
+import { SimpleModalService } from 'ngx-simple-modal';
+import { HistoryModalComponent } from '../history-modal/history-modal.component';
+
 import {
   AngularGridInstance,
   Column,
@@ -46,7 +49,13 @@ export class EditorComponent implements OnInit {
 
   tagSetting = {};
 
-  constructor(private router: Router, ar: ActivatedRoute, private sc: ScheduleService, private cs: ConfigService, private translate: TranslateService) {
+  constructor(
+    private router: Router,
+    ar: ActivatedRoute,
+    private sc: ScheduleService,
+    private cs: ConfigService,
+    private translate: TranslateService,
+    private simpleModalService: SimpleModalService) {
     this.scs = sc;
     this.cos = cs;
     let year = 0;
@@ -152,60 +161,6 @@ export class EditorComponent implements OnInit {
       // prevent the grid from cancelling drag'n'drop by default
       e.stopImmediatePropagation();
     });
-//     this.editorGridObj.slickGrid.onDragStart.subscribe(function (e, dd) {
-// console.log(e, dd);
-// console.log(dd.grid);
-//       var cell = dd.grid.getCellFromEvent(e);
-//       if (!cell) {
-//         return;
-//       }
-//       dd.row = cell.row;
-//       // if (!this.editorDataset[dd.row]) {
-//       //   return;
-//       // }
-//       if (window.Slick.GlobalEditorLock.isActive()) {
-//         return;
-//       }
-//       e.stopImmediatePropagation();
-//       dd.mode = "recycle";
-//       var selectedRows = dd.grid.getSelectedRows();
-//       if (!selectedRows.length || $.inArray(dd.row, selectedRows) == -1) {
-//         selectedRows = [dd.row];
-//         dd.grid.setSelectedRows(selectedRows);
-//       }
-//       dd.rows = selectedRows;
-//       dd.count = selectedRows.length;
-//       var proxy = $("<span></span>")
-//         .css({
-//           position: "absolute",
-//           display: "inline-block",
-//           padding: "4px 10px",
-//           background: "#e0e0e0",
-//           border: "1px solid gray",
-//           "z-index": 99999,
-//           "-moz-border-radius": "8px",
-//           "-moz-box-shadow": "2px 2px 6px silver"
-//         })
-//         .text("Drag to Recycle Bin to delete " + dd.count + " selected row(s)")
-//         .appendTo("body");
-//       dd.helper = proxy;
-//       $(dd.available).css("background", "pink");
-//       return proxy;
-//     });
-//     this.editorGridObj.slickGrid.onDrag.subscribe(function (e, dd) {
-//       if (dd.mode != "recycle") {
-//         return;
-//       }
-//       dd.helper.css({top: e.pageY + 5, left: e.pageX + 5});
-//     });
-//     this.editorGridObj.slickGrid.onDragEnd.subscribe(function (e, dd) {
-//       if (dd.mode != "recycle") {
-//         return;
-//       }
-//       dd.helper.remove();
-//       // $(dd.available).css("background", "beige");
-//     });
-
   }
   initEditorColumnDefinitions() {
     // config load.
@@ -445,33 +400,32 @@ export class EditorComponent implements OnInit {
         // データバリデーション
         if ($record['start'] >= $record['end']) {
           stopFlg = true;
-          alertMsgs = alertMsgs + '[line.'+lines+'] 開始時間と終了時間が逆転もしくは同一になっています\n';
+          alertMsgs = alertMsgs + '[line.' + lines + '] 開始時間と終了時間が逆転もしくは同一になっています\n';
         }
         // 必須条件判定
         if (this.tagSetting['tag1']['require']) {
-          console.log("tag1 require.");
           if (!$record['tag1']) {
             stopFlg = true;
-            alertMsgs = alertMsgs + '[line.'+lines+'] [必須条件エラー]"' + this.tagSetting['tag1']['name'] + '"を入力してください\n';
+            alertMsgs = alertMsgs + '[line.' + lines + '] [必須条件エラー]"' + this.tagSetting['tag1']['name'] + '"を入力してください\n';
           }
         }
         if (this.tagSetting['tag2']['require']) {
           if (!$record['tag2']) {
             stopFlg = true;
-            alertMsgs = alertMsgs + '[line.'+lines+'] [必須条件エラー]"' + this.tagSetting['tag2']['name'] + '"を入力してください\n';
+            alertMsgs = alertMsgs + '[line.' + lines + '] [必須条件エラー]"' + this.tagSetting['tag2']['name'] + '"を入力してください\n';
           }
         }
         if (this.tagSetting['tag3']['require']) {
           if (!$record['tag3']) {
             stopFlg = true;
-            alertMsgs = alertMsgs + '[line.'+lines+'] [必須条件エラー]"' + this.tagSetting['tag3']['name'] + '"を入力してください\n';
+            alertMsgs = alertMsgs + '[line.' + lines + '] [必須条件エラー]"' + this.tagSetting['tag3']['name'] + '"を入力してください\n';
           }
         }
       }
     }, this);
     if (saveData.length < 1) {
       if ($alertMsgFlg) {
-        alert('保存できるデータが存在しません。' + "\n" + '"開始時間"と"終了時間"の両方が設定されているレコードが保存対象になります。');
+        alert('保存できるデータが存在しません。\n"開始時間"と"終了時間"の両方が設定されているレコードが保存対象になります。');
       }
       return;
     }
@@ -489,7 +443,7 @@ export class EditorComponent implements OnInit {
       alert('[' + this.dateList['current_date'] + ']の日報を保存しました。');
     } else {
       const date = new Date();
-      this.saveStateMsg = '['+date.toLocaleTimeString()+']日報を保存しました';
+      this.saveStateMsg = '[' + date.toLocaleTimeString() + ']日報を保存しました';
     }
   }
   addEditorRow() {
@@ -499,5 +453,17 @@ export class EditorComponent implements OnInit {
       updatedItem.duration = 100;
       this.editorGridObj.gridService.updateDataGridItem(updatedItem);
     }
+  }
+
+  // 過去履歴参照モーダルの表示
+  showHistoryModal() {
+    console.log('＞＞履歴モーダルを起動');
+    this.simpleModalService.addModal(HistoryModalComponent, {
+      message: 'hogehoge',
+    })
+      .subscribe((conditions) => {
+        // Get modal result
+        console.log(conditions);
+      });
   }
 }

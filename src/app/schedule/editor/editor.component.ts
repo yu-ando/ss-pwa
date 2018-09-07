@@ -287,7 +287,7 @@ export class EditorComponent implements OnInit {
     }
   }
   createClassSet($item) {
-    let classSet = {
+    return  {
       start: '',
       end: '',
       hour: '',
@@ -297,7 +297,6 @@ export class EditorComponent implements OnInit {
       tag3: '',
       memo: '',
     };
-    return classSet;
   }
   styleSetting() {
     // css_styleを設定
@@ -374,7 +373,7 @@ export class EditorComponent implements OnInit {
   }
   onCellClick(e, args) {
     // delete btn process.
-    if (args.cell === 8) {
+    if (args.cell === 9) {
       const row = args.row;
       if (this.editorDataset.length > 1 && confirm("[行番号: " + (row + 1) + "] 削除しますか？")) {
         const deleteItem = this.editorGridObj.gridService.getDataItemByRowNumber(row);

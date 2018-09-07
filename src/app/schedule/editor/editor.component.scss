@@ -25,13 +25,9 @@
 .nav-area {
   font-size: 12px;
   margin: 5px 0 0 0;
-}
-.nav-link-left {
-  text-decoration:none;
-}
-.nav-link-right {
-  text-decoration:none;
-  float: right;
+  & a {
+    text-decoration:none;
+  }
 }
 
 .controll-panel {

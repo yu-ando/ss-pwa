@@ -42,7 +42,7 @@ export class HistoryModalComponent extends SimpleModalComponent<HistoryModel, bo
   showYesterday() {
     const target = new Date();
     target.setDate(target.getDate() - 1);
-    this.viewDate = target.getFullYear() + '/' + (target.getMonth() + 1) + '/' + target.getDate();
+    this.setViewDate(target.getFullYear(), (target.getMonth() + 1), target.getDate());
     this.displayHistoryData();
   }
 
@@ -52,7 +52,7 @@ export class HistoryModalComponent extends SimpleModalComponent<HistoryModel, bo
   showLastWeek() {
     const target = new Date();
     target.setDate(target.getDate() - 7);
-    this.viewDate = target.getFullYear() + '/' + (target.getMonth() + 1) + '/' + target.getDate();
+    this.setViewDate(target.getFullYear(), (target.getMonth() + 1), target.getDate());
     this.displayHistoryData();
   }
 
@@ -66,7 +66,7 @@ export class HistoryModalComponent extends SimpleModalComponent<HistoryModel, bo
       return;
     }
     const target = new Date(selectedDate);
-    this.viewDate = target.getFullYear() + '/' + (target.getMonth() + 1) + '/' + target.getDate();
+    this.setViewDate(target.getFullYear(), (target.getMonth() + 1), target.getDate());
     this.displayHistoryData();
   }
 
@@ -77,7 +77,7 @@ export class HistoryModalComponent extends SimpleModalComponent<HistoryModel, bo
   showTargetBefore() {
     const target = new Date(this.viewDate);
     target.setDate(target.getDate() - 1);
-    this.viewDate = target.getFullYear() + '/' + (target.getMonth() + 1) + '/' + target.getDate();
+    this.setViewDate(target.getFullYear(), (target.getMonth() + 1), target.getDate());
     this.displayHistoryData();
   }
 
@@ -88,8 +88,17 @@ export class HistoryModalComponent extends SimpleModalComponent<HistoryModel, bo
   showTargetAfter() {
     const target = new Date(this.viewDate);
     target.setDate(target.getDate() + 1);
-    this.viewDate = target.getFullYear() + '/' + (target.getMonth() + 1) + '/' + target.getDate();
+    this.setViewDate(target.getFullYear(), (target.getMonth() + 1), target.getDate());
     this.displayHistoryData();
+  }
+
+  /**
+   * ゼロ埋めした文字列でviewDateを設定する
+   */
+  setViewDate($year, $month, $date) {
+    this.viewDate = this.scheduleService.zeroFill($year, 4) +
+      '/' + this.scheduleService.zeroFill($month, 2) +
+      '/' + this.scheduleService.zeroFill($date, 2);
   }
 
   /**

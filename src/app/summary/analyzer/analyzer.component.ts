@@ -41,16 +41,16 @@ export class AnalyzerComponent implements OnInit {
   }
   setDateList($year, $month) {
     const current = new Date($year, $month - 1, 1);
-    this.dateList['current_year'] = current.getFullYear();
-    this.dateList['current_month'] = current.getMonth() + 1;
+    this.dateList['current_year'] = this.scheduleService.zeroFill(current.getFullYear(), 4);
+    this.dateList['current_month'] = this.scheduleService.zeroFill(current.getMonth() + 1, 2);
     this.dateList['current_date'] = this.dateList['current_year'] + '/' + this.dateList['current_month'];
     const pastday = new Date($year, $month - 2, 1);
-    this.dateList['past_year'] = pastday.getFullYear();
-    this.dateList['past_month'] = pastday.getMonth() + 1;
+    this.dateList['past_year'] = this.scheduleService.zeroFill(pastday.getFullYear(), 4);
+    this.dateList['past_month'] = this.scheduleService.zeroFill(pastday.getMonth() + 1, 2);
     this.dateList['past_date'] = this.dateList['past_year'] + '/' + this.dateList['past_month'];
     const nextday = new Date($year, $month, 1);
-    this.dateList['next_year'] = nextday.getFullYear();
-    this.dateList['next_month'] = nextday.getMonth() + 1;
+    this.dateList['next_year'] = this.scheduleService.zeroFill(nextday.getFullYear(), 4);
+    this.dateList['next_month'] = this.scheduleService.zeroFill(nextday.getMonth() + 1, 2);
     this.dateList['next_date'] = this.dateList['next_year'] + '/' + this.dateList['next_month'];
   }
 
@@ -63,7 +63,7 @@ export class AnalyzerComponent implements OnInit {
 
   // change analyze date.
   changeCurrentDate($year, $month) {
-    this.setDateList($year, $month);
+    this.setDateList(Number($year), Number($month));
 //    this.loadReportData();
   }
 

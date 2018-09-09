@@ -11,9 +11,6 @@ import {ConfigService} from '../../service/config.service';
   styleUrls: ['./report.component.scss']
 })
 export class ReportComponent implements OnInit {
-  private scs: ScheduleService;
-  private cos: ConfigService;
-
   editorMode = '1';
   saveStateMsg = '';
 
@@ -25,13 +22,15 @@ export class ReportComponent implements OnInit {
   reportClassset: any[] = [];
   timeTotalList = {0: 0, 1: 0, 2: 0};
 
-  constructor(private router: Router, ar: ActivatedRoute, private sc: ScheduleService, private cs: ConfigService, private translate: TranslateService) {
-    this.scs = sc;
-    this.cos = cs;
-
+  constructor(
+      private router: Router,
+      private activatedRoute: ActivatedRoute,
+      private scheduleService: ScheduleService,
+      private configService: ConfigService,
+      private translate: TranslateService) {
     let year = 0;
     let month = 0;
-    ar.params.subscribe(params => {
+    activatedRoute.params.subscribe(params => {
       if (!!params['year']) {
         year = Number(params['year']);
       } else {
@@ -47,16 +46,16 @@ export class ReportComponent implements OnInit {
   }
   setDateList($year, $month) {
     const current = new Date($year, $month - 1, 1);
-    this.dateList['current_year'] = current.getFullYear();
-    this.dateList['current_month'] = current.getMonth() + 1;
+    this.dateList['current_year'] = this.scheduleService.zeroFill(current.getFullYear(), 4);
+    this.dateList['current_month'] = this.scheduleService.zeroFill(current.getMonth() + 1, 2);
     this.dateList['current_date'] = this.dateList['current_year'] + '/' + this.dateList['current_month'];
     const pastday = new Date($year, $month - 2, 1);
-    this.dateList['past_year'] = pastday.getFullYear();
-    this.dateList['past_month'] = pastday.getMonth() + 1;
+    this.dateList['past_year'] = this.scheduleService.zeroFill(pastday.getFullYear(), 4);
+    this.dateList['past_month'] = this.scheduleService.zeroFill(pastday.getMonth() + 1, 2);
     this.dateList['past_date'] = this.dateList['past_year'] + '/' + this.dateList['past_month'];
     const nextday = new Date($year, $month, 1);
-    this.dateList['next_year'] = nextday.getFullYear();
-    this.dateList['next_month'] = nextday.getMonth() + 1;
+    this.dateList['next_year'] = this.scheduleService.zeroFill(nextday.getFullYear(), 4);
+    this.dateList['next_month'] = this.scheduleService.zeroFill(nextday.getMonth() + 1, 2);
     this.dateList['next_date'] = this.dateList['next_year'] + '/' + this.dateList['next_month'];
   }
 
@@ -67,7 +66,7 @@ export class ReportComponent implements OnInit {
   }
   // change edit date.
   changeCurrentDate($year, $month) {
-    this.setDateList($year, $month);
+    this.setDateList(Number($year), Number($month));
     this.loadReportData();
   }
 
@@ -115,7 +114,7 @@ export class ReportComponent implements OnInit {
   }
   loadReportData() {
     // config load.
-    this.editorMode = this.cos.getEditorMode(true);
+    this.editorMode = this.configService.getEditorMode(true);
 
     // data reset.
     this.reportDataset = [];
@@ -141,7 +140,7 @@ export class ReportComponent implements OnInit {
       current.setDate(day);
 
       let scheduleData = null;
-      const savedData = localStorage.getItem('ss_sc-' + this.dateList['current_date'] + '/' + day);
+      const savedData = localStorage.getItem('ss_sc-' + this.dateList['current_date'] + '/' + this.scheduleService.zeroFill(day, 2));
       if (savedData !== null) {
         try {
           // 日報データあり
@@ -181,9 +180,10 @@ export class ReportComponent implements OnInit {
     const dayNames = '日月火水木金土';
     const holidays = '1000001';
     // item作成とdefault設定
+    const currentDate = this.scheduleService.zeroFill($current.getDate(), 2);
     const item = {
-      id: this.dateList['current_date'] + '/' + $current.getDate(),
-      day: this.scs.zeroFill($current.getDate(), 2) + ' (' + dayNames[$current.getDay()] + ')',
+      id: this.dateList['current_date'] + '/' + currentDate,
+      day: currentDate + ' (' + dayNames[$current.getDay()] + ')',
       start: '--:--',
       end: '--:--',
       rest: '0.00',
@@ -203,7 +203,8 @@ export class ReportComponent implements OnInit {
       item.holiday = 1;
     }
     // planデータ設定
-    const planKey = $current.getFullYear() + '/' + ($current.getMonth() + 1) + '/' + $current.getDate();
+    const planKey = this.scheduleService.zeroFill($current.getFullYear(), 4) + '/' +
+      this.scheduleService.zeroFill($current.getMonth() + 1, 2) + '/' + currentDate;
     if (!!$planDataList[planKey]) {
       const planData = $planDataList[planKey];
       item.p_start = planData.p_start;
@@ -227,7 +228,7 @@ export class ReportComponent implements OnInit {
         if (end < $record.end) {
           end = $record.end;
         }
-        const hour = this.scs.calWorkHour($record.start, $record.end);
+        const hour = this.scheduleService.calWorkHour($record.start, $record.end);
         if ($record.category == 0) {
           work += hour;
         } else {
@@ -323,13 +324,13 @@ export class ReportComponent implements OnInit {
     if (args.cell === 6 || args.cell === 7 || args.cell === 8) {
       const updatedItem = this.reportGridObj.gridService.getDataItemByRowNumber(args.row);
       if (args.cell === 6) {
-        updatedItem.p_start = this.scs.formatTimeString(this.scs.convertToHankaku(args.item.p_start));
+        updatedItem.p_start = this.scheduleService.formatTimeString(this.scheduleService.convertToHankaku(args.item.p_start));
       }
       if (args.cell === 7) {
-        updatedItem.p_end = this.scs.formatTimeString(this.scs.convertToHankaku(args.item.p_end));
+        updatedItem.p_end = this.scheduleService.formatTimeString(this.scheduleService.convertToHankaku(args.item.p_end));
       }
-      const work = this.scs.calWorkHour(updatedItem.p_start, updatedItem.p_end);
-      let rest = Number(this.scs.convertToHankaku(updatedItem.p_rest));
+      const work = this.scheduleService.calWorkHour(updatedItem.p_start, updatedItem.p_end);
+      let rest = Number(this.scheduleService.convertToHankaku(updatedItem.p_rest));
       if (!rest) {
         // 休憩時間のフォーマットが数字以外の場合は"0.00"に差し替え
         updatedItem.p_rest = '0.00';

@@ -27,9 +27,6 @@ import {
   styleUrls: ['./editor.component.scss']
 })
 export class EditorComponent implements OnInit {
-  private scs: ScheduleService;
-  private cos: ConfigService;
-
   editorMode = '1';
   saveStateMsg = '';
 
@@ -50,18 +47,16 @@ export class EditorComponent implements OnInit {
   tagSetting = {};
 
   constructor(
-    private router: Router,
-    ar: ActivatedRoute,
-    private sc: ScheduleService,
-    private cs: ConfigService,
-    private translate: TranslateService,
-    private simpleModalService: SimpleModalService) {
-    this.scs = sc;
-    this.cos = cs;
+      private router: Router,
+      private activatedRoute: ActivatedRoute,
+      private scheduleService: ScheduleService,
+      private configService: ConfigService,
+      private translate: TranslateService,
+      private simpleModalService: SimpleModalService) {
     let year = 0;
     let month = 0;
     let day = 0;
-    ar.params.subscribe(params => {
+    activatedRoute.params.subscribe(params => {
       if (!!params['year']) {
         year = Number(params['year']);
       } else {
@@ -83,21 +78,21 @@ export class EditorComponent implements OnInit {
   setDateList($year, $month, $day) {
     const dayNames = '日月火水木金土';
     const current = new Date($year, $month - 1, $day);
-    this.dateList['current_year'] = current.getFullYear();
-    this.dateList['current_month'] = current.getMonth() + 1;
-    this.dateList['current_day'] = current.getDate();
+    this.dateList['current_year'] = this.scheduleService.zeroFill(current.getFullYear(), 4);
+    this.dateList['current_month'] = this.scheduleService.zeroFill(current.getMonth() + 1, 2);
+    this.dateList['current_day'] = this.scheduleService.zeroFill(current.getDate(), 2);
     this.dateList['current_weekday'] = dayNames[current.getDay()];
     this.dateList['current_date'] = this.dateList['current_year'] + '/' + this.dateList['current_month'] + '/' + this.dateList['current_day'];
     const pastday = new Date($year, $month - 1, $day - 1);
-    this.dateList['past_year'] = pastday.getFullYear();
-    this.dateList['past_month'] = pastday.getMonth() + 1;
-    this.dateList['past_day'] = pastday.getDate();
+    this.dateList['past_year'] = this.scheduleService.zeroFill(pastday.getFullYear(), 4);
+    this.dateList['past_month'] = this.scheduleService.zeroFill(pastday.getMonth() + 1, 2);
+    this.dateList['past_day'] = this.scheduleService.zeroFill(pastday.getDate(), 2);
     this.dateList['past_weekday'] = dayNames[pastday.getDay()];
     this.dateList['past_date'] = this.dateList['past_year'] + '/' + this.dateList['past_month'] + '/' + this.dateList['past_day'];
     const nextday = new Date($year, $month - 1, $day + 1);
-    this.dateList['next_year'] = nextday.getFullYear();
-    this.dateList['next_month'] = nextday.getMonth() + 1;
-    this.dateList['next_day'] = nextday.getDate();
+    this.dateList['next_year'] = this.scheduleService.zeroFill(nextday.getFullYear(), 4);
+    this.dateList['next_month'] = this.scheduleService.zeroFill(nextday.getMonth() + 1, 2);
+    this.dateList['next_day'] = this.scheduleService.zeroFill(nextday.getDate(), 2);
     this.dateList['past_weekday'] = dayNames[nextday.getDay()];
     this.dateList['next_date'] = this.dateList['next_year'] + '/' + this.dateList['next_month'] + '/' + this.dateList['next_day'];
   }
@@ -109,7 +104,7 @@ export class EditorComponent implements OnInit {
   }
   // change edit date.
   changeCurrentDate($year, $month, $day) {
-    this.setDateList($year, $month, $day);
+    this.setDateList(Number($year), Number($month), Number($day));
     this.loadEditorData();
   }
 
@@ -164,8 +159,8 @@ export class EditorComponent implements OnInit {
   }
   initEditorColumnDefinitions() {
     // config load.
-    this.tagSetting = this.cos.getTagSetting(true);
-    this.editorMode = this.cos.getEditorMode();
+    this.tagSetting = this.configService.getTagSetting(true);
+    this.editorMode = this.configService.getEditorMode();
 
     this.editorColumnDefinitions = [
       // @ts-ignore: AngularSlickgrid Column unsupported 'behavior'
@@ -330,21 +325,21 @@ export class EditorComponent implements OnInit {
     if (args.cell === 1 || args.cell === 2) {
       const editRowItem = this.editorGridObj.gridService.getDataItemByRowNumber(args.row);
       if (args.cell === 1) { // 開始時間
-        editRowItem.start = this.scs.formatTimeString(this.scs.convertToHankaku(args.item.start));
+        editRowItem.start = this.scheduleService.formatTimeString(this.scheduleService.convertToHankaku(args.item.start));
       }
       if (args.cell === 2) { // 終了時間
-        editRowItem.end = this.scs.formatTimeString(this.scs.convertToHankaku(args.item.end));
+        editRowItem.end = this.scheduleService.formatTimeString(this.scheduleService.convertToHankaku(args.item.end));
         // 次の行の開始時間を変更する
         const nextRowItem = this.editorGridObj.gridService.getDataItemByRowNumber(args.row + 1);
         if (!!nextRowItem) {
           nextRowItem.start = editRowItem.end;
           if (!!nextRowItem.end) {
-            nextRowItem.hour = this.scs.calWorkHour(nextRowItem.start, nextRowItem.end).toFixed(2);
+            nextRowItem.hour = this.scheduleService.calWorkHour(nextRowItem.start, nextRowItem.end).toFixed(2);
           }
         }
       }
       // 時間を計算し設定する
-      const hour = this.scs.calWorkHour(editRowItem.start, editRowItem.end).toFixed(2);
+      const hour = this.scheduleService.calWorkHour(editRowItem.start, editRowItem.end).toFixed(2);
       if (editRowItem.hour !== hour) {
         editRowItem.hour = hour;
       }
@@ -456,7 +451,6 @@ export class EditorComponent implements OnInit {
 
   // 過去履歴参照モーダルの表示
   showHistoryModal() {
-    console.log('＞＞履歴モーダルを起動');
     this.simpleModalService.addModal(HistoryModalComponent, {
       message: 'hogehoge',
     })

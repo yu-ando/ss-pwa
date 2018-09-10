@@ -1,5 +1,6 @@
 <div class="nav-area">
   <a routerLink="/summary/analyzer/{{dateList['past_date']}}" (click)="changeCurrentDate(dateList['past_year'], dateList['past_month'])">＜＜ [ {{dateList['past_date']}} ]</a>
+  &nbsp;|&nbsp;&nbsp;[ {{dateList['current_date']}} ]
   &nbsp;|&nbsp;&nbsp;<a routerLink="/summary/analyzer/{{dateList['next_date']}}" (click)="changeCurrentDate(dateList['next_year'], dateList['next_month'])">[ {{dateList['next_date']}} ] ＞＞</a>
   &nbsp;|&nbsp;&nbsp;<a routerLink="/summary/report/{{dateList['current_date']}}">[ この月の予定&実績集計ページへ ]</a>
 </div>

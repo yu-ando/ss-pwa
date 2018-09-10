@@ -1,11 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { SimpleModalComponent } from 'ngx-simple-modal';
 import { ScheduleService } from "../../service/schedule.service";
+import { ConfigService } from "../../service/config.service";
 import { MAT_MOMENT_DATE_FORMATS, MomentDateAdapter } from '@angular/material-moment-adapter';
 import { DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE } from '@angular/material/core';
 
 export interface HistoryModel {
-  message: string;
+  scheduleDate: string;
 }
 
 @Component({
@@ -18,42 +19,45 @@ export interface HistoryModel {
     {provide: MAT_DATE_FORMATS, useValue: MAT_MOMENT_DATE_FORMATS},
   ]
 })
-export class HistoryModalComponent extends SimpleModalComponent<HistoryModel, boolean> implements HistoryModel, OnInit {
-  analyzeConditions: any;
-  message: string;
+export class HistoryModalComponent extends SimpleModalComponent<HistoryModel, any> implements HistoryModel, OnInit {
+  scheduleDate: string;
 
   selectDate: any = '';
   viewDate: string = '';
 
+  categorySetting: any;
+  tagSetting: any;
   historyList: any;
+  copySelectionList: any = [];
+  allCheckFlg: boolean = false;
 
-  constructor(private adapter: DateAdapter<any>, private scheduleService: ScheduleService) {
+  constructor(private adapter: DateAdapter<any>, private scheduleService: ScheduleService, private configService: ConfigService) {
     super();
-    console.log('modal constructor!!');
   }
   ngOnInit() {
-    console.log('ngOnInit!!');
-    console.log(this.analyzeConditions);
+    this.tagSetting = this.configService.getTagSetting(true);
+    this.categorySetting = this.configService.getCategorySetting();
+    this.viewDate = this.scheduleDate;
   }
 
   /**
    * 昨日の日報を表示
    */
   showYesterday() {
-    const target = new Date();
+    const target = new Date(this.scheduleDate);
     target.setDate(target.getDate() - 1);
     this.setViewDate(target.getFullYear(), (target.getMonth() + 1), target.getDate());
-    this.displayHistoryData();
+    this.loadHistoryData();
   }
 
   /**
    * 先週の日報を表示
    */
   showLastWeek() {
-    const target = new Date();
+    const target = new Date(this.scheduleDate);
     target.setDate(target.getDate() - 7);
     this.setViewDate(target.getFullYear(), (target.getMonth() + 1), target.getDate());
-    this.displayHistoryData();
+    this.loadHistoryData();
   }
 
   /**
@@ -67,7 +71,7 @@ export class HistoryModalComponent extends SimpleModalComponent<HistoryModel, bo
     }
     const target = new Date(selectedDate);
     this.setViewDate(target.getFullYear(), (target.getMonth() + 1), target.getDate());
-    this.displayHistoryData();
+    this.loadHistoryData();
   }
 
   /**
@@ -78,7 +82,7 @@ export class HistoryModalComponent extends SimpleModalComponent<HistoryModel, bo
     const target = new Date(this.viewDate);
     target.setDate(target.getDate() - 1);
     this.setViewDate(target.getFullYear(), (target.getMonth() + 1), target.getDate());
-    this.displayHistoryData();
+    this.loadHistoryData();
   }
 
   /**
@@ -89,7 +93,7 @@ export class HistoryModalComponent extends SimpleModalComponent<HistoryModel, bo
     const target = new Date(this.viewDate);
     target.setDate(target.getDate() + 1);
     this.setViewDate(target.getFullYear(), (target.getMonth() + 1), target.getDate());
-    this.displayHistoryData();
+    this.loadHistoryData();
   }
 
   /**
@@ -104,21 +108,68 @@ export class HistoryModalComponent extends SimpleModalComponent<HistoryModel, bo
   /**
    * 指定日(this.viewDate)のデータを表示する
    */
-  displayHistoryData() {
+  loadHistoryData() {
     const schedule = this.scheduleService.loadSchedule(this.viewDate);
-    console.log(schedule);
 
+    //TODO:一旦全部そのまま突っ込むが、ここでフィルタリング処理をする
+    console.log(schedule);
     this.historyList = schedule;
+
+    this.copySelectionList = [];
+    for (const idx in this.historyList) {
+      const item = this.historyList[idx];
+      this.copySelectionList[item.id] = {check: false, history: idx};
+    }
   }
 
+  /**
+   * 全コピーチェックの一括切り替え
+   */
+  toggleAllCheck() {
+    let changeCheck = false;
+    if (!this.allCheckFlg) {
+      changeCheck = true;
+    }
+    for (const idx in this.copySelectionList) {
+      this.copySelectionList[idx]['check'] = changeCheck;
+    }
+  }
+
+  /**
+   * 単一レコードのコピーチェック切り替え
+   * @param $id 対象ID
+   */
+  copyCheck($id) {
+    if (!this.copySelectionList[$id]['check']) {
+      this.copySelectionList[$id]['check'] = true;
+    } else {
+      this.copySelectionList[$id]['check'] = false;
+      this.allCheckFlg = false;
+    }
+  }
+
+  /**
+   * 選択項目のコピー確認とコピー対象連携
+   */
   confirm() {
-    // on click on confirm button we set dialog result as true,
-    // ten we can get dialog result from caller code
-    this.result = true;
+    this.result = []
+    for (const idx in this.copySelectionList) {
+      if (this.copySelectionList[idx]['check']) {
+        this.result.push(this.historyList[this.copySelectionList[idx]['history']]);
+      }
+    }
+    if (this.result.length < 1) {
+      alert('コピーする履歴が選択されていません。\n履歴ウィンドウを閉じる場合は"閉じる"ボタンを押してください。');
+      return;
+    }
     this.close();
   }
+
+  /**
+   * 処理キャンセル、モーダルクローズ
+   */
   cancel() {
-    this.result = false;
+    this.result = [];
     this.close();
   }
 }

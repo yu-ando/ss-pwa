@@ -452,11 +452,45 @@ export class EditorComponent implements OnInit {
   // 過去履歴参照モーダルの表示
   showHistoryModal() {
     this.simpleModalService.addModal(HistoryModalComponent, {
-      message: 'hogehoge',
+      scheduleDate: this.dateList['current_date'],
     })
-      .subscribe((conditions) => {
-        // Get modal result
-        console.log(conditions);
-      });
+    .subscribe((copySchedule) => {
+      if (!copySchedule || copySchedule.length < 1) {
+        return;
+      }
+      // 履歴コピー処理
+      console.log(this.editorDataset);
+      console.log(copySchedule);
+      const copyMaxCount = copySchedule.length;
+      let copyCount = 0;
+      for (const idx in this.editorDataset) {
+        const check = this.editorGridObj.gridService.getDataItemByRowNumber(Number(idx));
+        if (!check.start && !check.end && !check.tag1 && !check.tag2 && !check.tag3 && !check.memo && check.category == 0) {
+          check.category = copySchedule[copyCount].category;
+          check.tag1 = copySchedule[copyCount].tag1;
+          check.tag2 = copySchedule[copyCount].tag2;
+          check.tag3 = copySchedule[copyCount].tag3;
+          check.memo = copySchedule[copyCount].memo;
+          if (++copyCount >= copyMaxCount) {
+            break;
+          }
+        }
+      }
+
+      // から行がなかった場合、新規行として追加する TODO:未実装
+      console.log('max: ' + copyMaxCount);
+      console.log('now: ' + copyCount);
+      for (;copyCount < copyMaxCount; ++copyCount) {
+        this.addBlankRow();
+        const check = this.editorGridObj.gridService.getDataItemByRowNumber(this.editorDataset.length);
+        check.category = copySchedule[copyCount].category;
+        check.tag1 = copySchedule[copyCount].tag1;
+        check.tag2 = copySchedule[copyCount].tag2;
+        check.tag3 = copySchedule[copyCount].tag3;
+        check.memo = copySchedule[copyCount].memo;
+      }
+      // コピー要素がなくなるまで上書き挿入
+      this.editorGridObj.gridService.renderGrid();
+    });
   }
 }

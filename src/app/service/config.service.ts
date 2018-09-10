@@ -19,23 +19,38 @@ export class ConfigService {
       } catch ($e) {
         console.log($e);
       }
-    } else {
-      // default config setting.
-      this.CONFIG = {
-        editor_mode: '1',
-        tag_setting: {
-          tag1: {
-            name: '種別',
-            require: false,
-          },
-          tag2: {
-            name: '内容',
-            require: false,
-          },
-          tag3: {
-            name: '課題キー',
-            require: false,
-          }
+    }
+
+    // default config setting.
+    if (!this.CONFIG['editor_mode']) {
+      this.CONFIG['editor_mode'] = '1';
+    }
+    if (!this.CONFIG['tag_setting']) {
+      this.CONFIG['tag_setting'] = {
+        tag1: {
+          name: '種別',
+          require: false,
+        },
+        tag2: {
+          name: '内容',
+          require: false,
+        },
+        tag3: {
+          name: '課題キー',
+          require: false,
+        }
+      };
+    }
+    if (!this.CONFIG['category_setting']) {
+      this.CONFIG['category_setting'] = {
+        0: {
+          name: '業務内'
+        },
+        1: {
+          name: '休憩'
+        },
+        2: {
+          name: '業務外'
         }
       };
     }
@@ -83,5 +98,12 @@ export class ConfigService {
    */
   setTagSetting($tagSetting) {
     this.CONFIG['tag_setting'] = $tagSetting;
+  }
+
+  getCategorySetting($reload = false) {
+    if ($reload) {
+      this.loadConfig();
+    }
+    return this.CONFIG['category_setting'];
   }
 }

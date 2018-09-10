@@ -1,5 +1,6 @@
 <div class="nav-area">
   <a routerLink="/schedule/editor/{{dateList['past_date']}}" (click)="changeCurrentDate(dateList['past_year'], dateList['past_month'], dateList['past_day'])">＜＜ [ {{dateList['past_date']}} ]</a>
+  &nbsp;|&nbsp;&nbsp;[ {{dateList['current_date']}} ]
   &nbsp;|&nbsp;&nbsp;<a routerLink="/schedule/editor/{{dateList['next_date']}}" (click)="changeCurrentDate(dateList['next_year'], dateList['next_month'], dateList['next_day'])">[ {{dateList['next_date']}} ] ＞＞</a>
 </div>
 <h1 class="content-title">{{dateList['current_date']}} 日報入力</h1>

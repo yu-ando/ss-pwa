@@ -34,12 +34,12 @@ export class EditorComponent implements OnInit {
   planData = {};
   planNoSetMsg = '';
   editorGridObj: AngularGridInstance;
+  nextid: number;
 
   editorColumnDefinitions: Column[];
   editorGridOptions: GridOption;
   editorDataset: any[] = [];
   editorClassset: any[] = [];
-  nextId: number;
   categoryList = {0: '業務内', 1: '休憩', 2: '業務外'};
   categoryFormatter: Formatter = (row: number, cell: number, value: any, columnDef: Column, dataContext: any, grid?: any) => this.categoryList[value];
   categoryTotalList = {0: 0, 1: 0, 2: 0};
@@ -228,10 +228,11 @@ export class EditorComponent implements OnInit {
       }
     }
     this.editorDataset = result;
-    this.nextId = 1 + this.editorDataset.length;
     // 未登録の場合は、基本要素を表示
-    if (this.nextId === 1) {
+    this.nextid = this.editorDataset.length + 1;
+    if (this.editorDataset.length < 1) {
       this.addBlankRow(10);
+      this.nextid = 11;
     }
     // 総時間数の更新
     this.calTotalTime();
@@ -293,9 +294,25 @@ export class EditorComponent implements OnInit {
       memo: '',
     };
   }
+  createItemBase() {
+    const item = {
+      id: this.nextid,
+      start: null,
+      end: null,
+      hour: '0.00',
+      category: 0,
+      tag1: null,
+      tag2: null,
+      tag3: null,
+      memo: null,
+      del: null,
+    };
+    this.nextid += 1;
+    return item;
+  }
   styleSetting() {
     // css_styleを設定
-    this.editorGridObj.slickGrid.setCellCssStyles("", this.editorClassset);
+    this.editorGridObj.slickGrid.setCellCssStyles('', this.editorClassset);
   }
   addBlankRow(addcount: number = 1) {
     const lastItem = this.editorDataset.pop(); // 末尾要素を取り出し
@@ -305,20 +322,8 @@ export class EditorComponent implements OnInit {
     }
     // 指定行数分、基本要素を追加する
     for (let count = 1; count <= addcount; count++) {
-      const item = {
-        id: this.nextId,
-        start: null,
-        end: null,
-        hour: '0.00',
-        category: 0,
-        tag1: null,
-        tag2: null,
-        tag3: null,
-        memo: null,
-        del: null,
-      };
+      const item = this.createItemBase();
       this.editorDataset.push(item);
-      this.nextId += 1;
     }
   }
   onCellChanged(e, args) {
@@ -350,7 +355,7 @@ export class EditorComponent implements OnInit {
     this.editorGridObj.gridService.renderGrid();
 
     // editorMode '2': realtime save.
-    if (this.editorMode == '2') {
+    if (this.editorMode === '2') {
       this.saveScheduleItem(false);
     }
   }
@@ -370,11 +375,13 @@ export class EditorComponent implements OnInit {
     // delete btn process.
     if (args.cell === 9) {
       const row = args.row;
-      if (this.editorDataset.length > 1 && confirm("[行番号: " + (row + 1) + "] 削除しますか？")) {
-        const deleteItem = this.editorGridObj.gridService.getDataItemByRowNumber(row);
-        this.editorGridObj.gridService.deleteDataGridItemById(deleteItem.id);
+      if (this.editorDataset.length > 1 && confirm('[行番号: ' + (row + 1) + '] 削除しますか？')) {
+        // 削除ロジック
+        this.editorDataset.splice(row, 1);
         // 総時間数の更新
         this.calTotalTime();
+        // 再描画
+        this.reloadGrid();
       }
     }
   }
@@ -442,14 +449,12 @@ export class EditorComponent implements OnInit {
   }
   addEditorRow() {
     this.addBlankRow();
-    const updatedItem = this.editorGridObj.gridService.getDataItemByRowNumber(0);
-    if (!!updatedItem) {
-      updatedItem.duration = 100;
-      this.editorGridObj.gridService.updateDataGridItem(updatedItem);
-    }
+    this.reloadGrid();
   }
 
-  // 過去履歴参照モーダルの表示
+  /**
+   * 過去履歴参照モーダルの表示とコピー処理
+   */
   showHistoryModal() {
     this.simpleModalService.addModal(HistoryModalComponent, {
       scheduleDate: this.dateList['current_date'],
@@ -476,21 +481,27 @@ export class EditorComponent implements OnInit {
           }
         }
       }
-
-      // から行がなかった場合、新規行として追加する TODO:未実装
-      console.log('max: ' + copyMaxCount);
-      console.log('now: ' + copyCount);
-      for (;copyCount < copyMaxCount; ++copyCount) {
-        this.addBlankRow();
-        const check = this.editorGridObj.gridService.getDataItemByRowNumber(this.editorDataset.length);
-        check.category = copySchedule[copyCount].category;
-        check.tag1 = copySchedule[copyCount].tag1;
-        check.tag2 = copySchedule[copyCount].tag2;
-        check.tag3 = copySchedule[copyCount].tag3;
-        check.memo = copySchedule[copyCount].memo;
+      // 空行がなかった場合、新規行として追加する
+      for (; copyCount < copyMaxCount; ++copyCount) {
+        const newSchedule = this.createItemBase();
+        newSchedule.category = copySchedule[copyCount].category;
+        newSchedule.tag1 = copySchedule[copyCount].tag1;
+        newSchedule.tag2 = copySchedule[copyCount].tag2;
+        newSchedule.tag3 = copySchedule[copyCount].tag3;
+        newSchedule.memo = copySchedule[copyCount].memo;
+        this.editorDataset.push(newSchedule);
       }
-      // コピー要素がなくなるまで上書き挿入
-      this.editorGridObj.gridService.renderGrid();
+      // 画面再描画
+      this.reloadGrid();
     });
+  }
+
+  reloadGrid() {
+    const updatedItem = this.editorGridObj.gridService.getDataItemByRowNumber(0);
+    if (!!updatedItem) {
+      updatedItem.duration = 100;
+      this.editorGridObj.gridService.updateDataGridItem(updatedItem);
+    }
+    this.editorGridObj.gridService.renderGrid();
   }
 }
